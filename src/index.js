@@ -4,7 +4,7 @@ import initViewPort from "./can/viewport";
 import getEventListeners from "./can/event-listeners";
 
 import Launcher from "./phyz/launcher";
-import { putLauncher, getLaunchers, getLauncher } from "./phyz/launcher";
+import { removeLauncherOtherThan, getLaunchers, getLauncher } from "./phyz/launcher";
 import Marble from "./phyz/marble";
 import getColliders from "./phyz/colliders";
 import { addMarble, clearMarbles, getMarbles } from "./phyz/marbles";
@@ -63,13 +63,32 @@ window.setInterval(
 );
 
 const reinitLaunchers = (controllerIndices) => {
-	controllerIndices
-		.forEach(idx => {
-			getLauncher(idx, new Launcher({
-				collidesWithMarble: colliders.marbleCollidesWithMarble
-			}), () => reloadLaucher(idx));
 
+	controllerIndices
+		.filter((c,idx) => idx < 2)
+		.forEach(idx => {
+			getLauncher(idx, new Launcher({}), () => reloadLaucher(idx));
 		});
+
+	if (controllerIndices.length === 1 && getLaunchers().length > 1) {
+		removeLauncherOtherThan(controllerIndices);
+	}
+
+	if (controllerIndices.length === 1) {
+		getLaunchers()[0]._x = 500;
+		if (getLaunchers()[0].marble) {
+			getLaunchers()[0].marble._x = 500;
+		}
+	} else if (controllerIndices.length === 2) {
+		getLaunchers()[0]._x = 250;
+		if (getLaunchers()[0].marble) {
+			getLaunchers()[0].marble._x = 250;
+		}
+		getLaunchers()[1]._x = 750;
+		if (getLaunchers()[1].marble) {
+			getLaunchers()[1].marble._x = 750;
+		}
+	}
 }
 
 const reloadLaucher = (lIdx) => {

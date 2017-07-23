@@ -1,4 +1,3 @@
-import Marble from "./marble";
 class Launcher {
 
 	constructor({ x, y, angle, fill, collidesWithMarble }) {
@@ -54,7 +53,14 @@ const getLauncher = (idx, def, ifNotPresent = () => {}) => {
 	return launchers[idx];
 }
 
-
+const removeLauncherOtherThan = (indices) => {
+	Object.keys(launchers)
+		.filter(k => indices.indexOf(k) < 0)
+		.forEach(k => {
+			launchers[k].marble = null;
+			delete launchers[k];
+		})
+}
 
 export default Launcher;
-export { getLaunchers , getLauncher }
+export { getLaunchers, getLauncher, removeLauncherOtherThan }
