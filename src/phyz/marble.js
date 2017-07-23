@@ -39,7 +39,10 @@ class Marble {
 			this.snapToTop();
 		}
 
-		this.collidesWithMarble(this, this.onCollision);
+		const other = this.collidesWithMarble(this);
+		if (other) {
+			this.onCollision(other);
+		}
 	}
 
 	snapToTop() {
@@ -55,9 +58,25 @@ class Marble {
 		this.snapped = true;
 	}
 
-	onCollision(otherMarble, distance) {
+	onCollision(otherMarble) {
 		this.snapped = true;
-		//console.log(otherMarble);
+		const opts = [0, 60, 120, 180, 240, 300]
+			.map(deg => deg * (Math.PI / 180))
+			.map(rad => ({
+				x: Math.round(otherMarble._x + Math.cos(rad) * (otherMarble.radius * 2)),
+				y: Math.round(otherMarble._y + Math.sin(rad) * (otherMarble.radius * 2))
+			}))
+			.map(({x, y}) => ({
+				x: x,
+				y: y,
+				delta: Math.sqrt(
+					Math.pow(this._x - x, 2) +
+					Math.pow(this._y - y, 2)
+				)
+			}))
+			.sort((a, b) => a.delta < b.delta ? -1 : 1);
+		this._x = opts[0].x;
+		this._y = opts[0].y;
 	}
 
 

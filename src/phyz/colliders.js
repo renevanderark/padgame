@@ -1,8 +1,8 @@
 export default (getMarbles) => {
 	return {
-		marbleCollidesWithMarble: (marble, onCollision) =>
-			getMarbles()
-				.filter(m => m._id !== marble._id)
+		marbleCollidesWithMarble: (marble) => {
+			const found = getMarbles()
+				.filter(m => m._id !== marble._id && m.snapped)
 				.map(m => ({
 					distance: Math.sqrt(
 						Math.pow(m._x - marble._x, 2) +
@@ -10,8 +10,11 @@ export default (getMarbles) => {
 					m: m
 				}))
 				.filter(obj => obj.distance < marble.radius + obj.m.radius)
-				.forEach(obj => {
-					onCollision.bind(marble)(obj.m, obj.distance)
-				})
+				.sort((a, b) => a.distance < b.distance ? 1 : -1);
+			if (found.length > 0) {
+				return found[0].m;
+			}
+			return null;
+		}
 	}
 }

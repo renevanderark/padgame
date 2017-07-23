@@ -53,7 +53,7 @@ window.setInterval(
 		})
 		getMarbles().forEach(m => m.accelerate());
 	},
-  20
+  10
 );
 
 const reinitLaunchers = (controllerIndices) => {
@@ -90,9 +90,9 @@ const reloadLaucher = (lIdx) => {
 	if (!l.marble) {
 		l.marble = new Marble({
 			x: l._x, y: l._y,
-			stroke: "rgba(255, 255, 0, 0.8)",
-			fill: "rgba(255, 255, 0, 0.95)",
-			radius: 25, angle: l.ang - (90 * (Math.PI / 180)),
+			stroke: "rgba(255, 255, 0, 0.6)",
+			fill: "rgba(255, 255, 0, 0.85)",
+			radius: 30, angle: l.ang - (90 * (Math.PI / 180)),
 			collidesWithMarble: colliders.marbleCollidesWithMarble
 		});
 	}
