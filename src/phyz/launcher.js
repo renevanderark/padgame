@@ -9,24 +9,29 @@ class Launcher {
 	}
 
 	accelerate() {
-		
+
 		this.ang += this.acc;
 
 	}
 
 	draw(ctx, scale) {
 		ctx.save();
+		ctx.translate(this._x * scale, this._y * scale);
+		ctx.rotate(this.ang);
 		ctx.beginPath();
 		ctx.lineWidth = 4;
 		ctx.strokeStyle = this.fill;
-		ctx.translate(this._x * scale, this._y * scale);
-		ctx.rotate(this.ang);
 		ctx.arc(
 			0, 0,
 			25 * scale,  0, Math.PI, false
 		)
-
 		ctx.stroke();
+		ctx.beginPath();
+		ctx.fillStyle = this.fill;
+		ctx.arc(0, 0, 25 * scale,
+			80 * (Math.PI / 180), 100 * (Math.PI / 180), false);
+		ctx.lineTo(0, -50 * scale);
+		ctx.fill();
 		ctx.restore();
 	};
 }
