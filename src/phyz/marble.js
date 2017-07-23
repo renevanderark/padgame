@@ -6,7 +6,7 @@ class Marble {
 		this._id = uuid();
 		this._x = x;
 		this._y = y;
-		this.acc = 12.0;
+		this.acc = 16.0;
 		this.ang = angle;
 		this.radius = radius;
 		this.fill = fill || "red";
@@ -15,6 +15,7 @@ class Marble {
 	}
 
 	accelerate() {
+		if (this.snapped) { return; }
 		this._y += Math.sin(this.ang) * this.acc;
 		this._x += Math.cos(this.ang) * this.acc;
 
@@ -26,7 +27,7 @@ class Marble {
 			this.ang = zDeg * (Math.PI / 180);
 		}
 
-		if (this._y + this.radius > 1000 || this._y - this.radius  < 0) {
+		if (this._y + this.radius > 1000) {
 			const xDeg = 0;
 			const yDeg = this.ang / (Math.PI / 180);
 			const zDeg = Math.PI + (2*xDeg) - yDeg;
@@ -34,10 +35,28 @@ class Marble {
 			this.ang = zDeg * (Math.PI / 180);
 		}
 
+		if (this._y - this.radius  < 0) {
+			this.snapToTop();
+		}
+
 		this.collidesWithMarble(this, this.onCollision);
 	}
 
+	snapToTop() {
+		for (let i = 0; i < 1000; i += this.radius * 2) {
+			if (i + this.radius * 2 >= this._x &&
+				i <= this._x) {
+				this._x = i + this.radius;
+				break;
+			}
+		}
+
+		this._y = this.radius;
+		this.snapped = true;
+	}
+
 	onCollision(otherMarble, distance) {
+		this.snapped = true;
 		//console.log(otherMarble);
 	}
 

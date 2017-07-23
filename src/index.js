@@ -45,13 +45,7 @@ const baseMarbleOpts = {
 	collidesWithMarble: colliders.marbleCollidesWithMarble
 };
 
-/*
-window.addEventListener("gamepad-a-pressed", () =>
-  addMarble(new Marble({...baseMarbleOpts,
-		x: 50,
-		angle: (Math.random() * 90) * (Math.PI / 180)})));
 
-*/
 window.setInterval(
   () => {
 		getLaunchers().forEach(l => {
@@ -98,7 +92,7 @@ const reloadLaucher = (lIdx) => {
 			x: l._x, y: l._y,
 			stroke: "rgba(255, 255, 0, 0.8)",
 			fill: "rgba(255, 255, 0, 0.95)",
-			radius: 20, angle: l.ang - (90 * (Math.PI / 180)),
+			radius: 25, angle: l.ang - (90 * (Math.PI / 180)),
 			collidesWithMarble: colliders.marbleCollidesWithMarble
 		});
 	}

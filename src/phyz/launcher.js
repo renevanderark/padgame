@@ -1,9 +1,9 @@
 class Launcher {
 
-	constructor({ x, y, angle, fill, collidesWithMarble }) {
+	constructor({ x, y, fill, collidesWithMarble }) {
 		this._x = x || 500;
 		this._y = y || 950;
-		this.ang = angle || 45 * (Math.PI / 180);
+		this.ang = 0;
 		this.fill = fill || "black";
 		this.acc = 0;
 		this.marble = null;

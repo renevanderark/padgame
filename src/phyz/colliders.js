@@ -11,7 +11,7 @@ export default (getMarbles) => {
 				}))
 				.filter(obj => obj.distance < marble.radius + obj.m.radius)
 				.forEach(obj => {
-					onCollision(obj.m, obj.distance)
+					onCollision.bind(marble)(obj.m, obj.distance)
 				})
 	}
 }
