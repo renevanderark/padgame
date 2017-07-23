@@ -1,17 +1,18 @@
+import Marble from "./marble";
 class Launcher {
 
-	constructor({ x, y, angle, fill }) {
+	constructor({ x, y, angle, fill, collidesWithMarble }) {
 		this._x = x || 500;
 		this._y = y || 950;
 		this.ang = angle || 45 * (Math.PI / 180);
-		this.fill = fill || "red";
+		this.fill = fill || "black";
 		this.acc = 0;
+		this.marble = null;
+		this.collidesWithMarble = collidesWithMarble;
 	}
 
 	accelerate() {
-
 		this.ang += this.acc;
-
 	}
 
 	draw(ctx, scale) {
@@ -41,16 +42,19 @@ let launchers = {};
 const getLaunchers = () =>
 	Object.keys(launchers).map(k => launchers[k]);
 
-const getLauncher = (idx, def) => {
-	if (!launchers[idx]) {
-		putLauncher(idx, def);
-	}
-	return launchers[idx];
-}
-
 const putLauncher = (idx, launcher) => {
 	launchers[idx] = launchers[idx] || launcher;
 }
 
+const getLauncher = (idx, def, ifNotPresent = () => {}) => {
+	if (!launchers[idx]) {
+		putLauncher(idx, def);
+		ifNotPresent();
+	}
+	return launchers[idx];
+}
+
+
+
 export default Launcher;
-export { getLaunchers, putLauncher, getLauncher }
+export { getLaunchers , getLauncher }

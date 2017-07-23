@@ -23,7 +23,12 @@ const colliders = getColliders(getMarbles);
 
 
 const renderLoop = () => {
-	frameRenderer.render(getMarbles().concat(getLaunchers()));
+	frameRenderer.render(
+		getMarbles()
+		.concat(getLaunchers())
+		.concat(getLaunchers().map(l => l.marble)
+			.filter(m => m !== null))
+	);
 	requestAnimationFrame(renderLoop);
 };
 
@@ -48,20 +53,78 @@ window.addEventListener("gamepad-a-pressed", () =>
 
 */
 window.setInterval(
-  () => getLaunchers().forEach(l => l.accelerate()),
+  () => {
+		getLaunchers().forEach(l => {
+			l.accelerate();
+		})
+		getMarbles().forEach(m => m.accelerate());
+	},
   20
 );
 
-
-window.addEventListener("gamepad-l-axis-x-change", ({detail: {force, controllerIndex}}) => {
-	getLauncher(controllerIndex).acc = Math.abs(force) === 100 ?
-		force * 0.001 : 0;
-});
-
-const updateLaunchers = (controllerIndices) => {
+const reinitLaunchers = (controllerIndices) => {
 	controllerIndices
-		.forEach(idx => putLauncher(idx, new Launcher({})));
+		.forEach(idx => {
+			getLauncher(idx, new Launcher({
+				collidesWithMarble: colliders.marbleCollidesWithMarble
+			}), () => reloadLaucher(idx));
+
+		});
 }
 
+const reloadLaucher = (lIdx) => {
+	const l = getLauncher(lIdx);
+	if (!l.marble) {
+		l.marble = new Marble({
+			x: l._x, y: l._y,
+			stroke: "rgba(255, 255, 0, 0.8)",
+			fill: "rgba(255, 255, 0, 0.95)",
+			radius: 20, angle: l.ang - (90 * (Math.PI / 180)),
+			collidesWithMarble: colliders.marbleCollidesWithMarble
+		});
+	}
+}
 
-console.log(initPadEvents({ onControllersChange: updateLaunchers}));
+const launchMarble = (lIdx) => {
+
+	if (getLauncher(lIdx).marble) {
+		getLauncher(lIdx).marble.ang = getLauncher(lIdx).ang - (90 * (Math.PI / 180));
+		addMarble(getLauncher(lIdx).marble);
+		getLauncher(lIdx).marble = null;
+		window.setTimeout(() => reloadLaucher(lIdx), 1000);
+	}
+}
+
+window.addEventListener("gamepad-l-axis-x-change", ({detail: {force, controllerIndex}}) => {
+	//console.log(controllerIndex);
+	getLauncher(controllerIndex).acc =
+		Math.abs(force) === 100 ?
+			force * 0.0002 : 0;
+});
+
+window.addEventListener("gamepad-a-pressed", ({detail: { controllerIndex }}) => {
+	launchMarble(controllerIndex);
+})
+/*
+window.addEventListener("keydown", (ev) => {
+	reinitLaunchers(["1"]);
+	if (ev.keyCode === 37) {
+		getLauncher("1").acc = -0.01;
+	}
+	if (ev.keyCode === 39) {
+		getLauncher("1").acc = 0.01;
+	}
+	if (ev.keyCode === 32) {
+		launchMarble("1");
+	}
+});
+
+window.addEventListener("keyup", (ev) => {
+	if (ev.keyCode === 37 || ev.keyCode === 39) {
+		getLauncher("1").acc = 0;
+	}
+});
+*/
+
+
+initPadEvents({ onControllersChange: reinitLaunchers});
