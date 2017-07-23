@@ -3,6 +3,8 @@ import getResizeListeners from "./can/resize-listeners";
 import initViewPort from "./can/viewport";
 import getEventListeners from "./can/event-listeners";
 
+import Launcher from "./phyz/launcher";
+import { putLauncher, getLaunchers, getLauncher } from "./phyz/launcher";
 import Marble from "./phyz/marble";
 import getColliders from "./phyz/colliders";
 import { addMarble, clearMarbles, getMarbles } from "./phyz/marbles";
@@ -21,7 +23,7 @@ const colliders = getColliders(getMarbles);
 
 
 const renderLoop = () => {
-	frameRenderer.render(getMarbles());
+	frameRenderer.render(getMarbles().concat(getLaunchers()));
 	requestAnimationFrame(renderLoop);
 };
 
@@ -38,15 +40,28 @@ const baseMarbleOpts = {
 	collidesWithMarble: colliders.marbleCollidesWithMarble
 };
 
+/*
 window.addEventListener("gamepad-a-pressed", () =>
   addMarble(new Marble({...baseMarbleOpts,
 		x: 50,
 		angle: (Math.random() * 90) * (Math.PI / 180)})));
 
-
+*/
 window.setInterval(
-  () => getMarbles().forEach(m => m.accelerate()),
+  () => getLaunchers().forEach(l => l.accelerate()),
   20
 );
 
-console.log(initPadEvents());
+
+window.addEventListener("gamepad-l-axis-x-change", ({detail: {force, controllerIndex}}) => {
+	getLauncher(controllerIndex).acc = Math.abs(force) === 100 ?
+		force * 0.001 : 0;
+});
+
+const updateLaunchers = (controllerIndices) => {
+	controllerIndices
+		.forEach(idx => putLauncher(idx, new Launcher({})));
+}
+
+
+console.log(initPadEvents({ onControllersChange: updateLaunchers}));
