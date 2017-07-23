@@ -1,31 +1,6 @@
-import linesIntersect from "./lines-intersect";
-
-export default (getBars, getMarbles) => {
+export default (getMarbles) => {
 	return {
-		marbleCollidesWithBar: (marble, _ang) => {
-			const bars = getBars();
-			for (let i = 0; i < bars.length; i++) {
-				const collides = linesIntersect(
-					bars[i].getLineVector(),
-					[
-						marble._x - Math.cos(_ang) * (marble.radius + 1),
-						marble._y - Math.cos(_ang) * (marble.radius + 1),
-						marble._x + Math.cos(_ang) * (marble.radius + 1),
-						marble._y + Math.sin(_ang) * (marble.radius + 1)
-					]
-				);
-				if (collides) {
-					return {
-						collides: true,
-						angle: bars[i].getAngle()
-					};
-				}
-			}
-			return {
-				collides: false
-			};
-		},
-		marbleCollidesWithMarble: (marble) =>
+		marbleCollidesWithMarble: (marble, onCollision) =>
 			getMarbles()
 				.filter(m => m._id !== marble._id)
 				.map(m => ({
@@ -36,7 +11,7 @@ export default (getBars, getMarbles) => {
 				}))
 				.filter(obj => obj.distance < marble.radius + obj.m.radius)
 				.forEach(obj => {
-					obj.m.bounceAwayFrom(marble, obj.distance)
+					onCollision(obj.m, obj.distance)
 				})
 	}
 }

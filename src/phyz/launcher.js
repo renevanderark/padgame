@@ -1,16 +1,10 @@
-import uuid from "uuid";
+class Launcher {
 
-class Marble {
-
-	constructor({ x, y, angle, fill,  radius, collidesWithBar, collidesWithMarble }) {
-		this._id = uuid();
+	constructor({ x, y, angle, fill }) {
 		this._x = x;
 		this._y = y;
-		this.acc = 12.0;
 		this.ang = angle;
-		this.radius = radius;
 		this.fill = fill || "red";
-		this.collidesWithMarble = collidesWithMarble;
 	}
 
 	accelerate() {
@@ -55,4 +49,4 @@ class Marble {
 	};
 }
 
-export default Marble;
+export default Launcher;
