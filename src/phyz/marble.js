@@ -12,10 +12,12 @@ class Marble {
 		this.fill = fill || "red";
 		this.stroke = stroke || "red";
 		this.collidesWithMarble = collidesWithMarble;
+		this.updated = true;
 	}
 
 	accelerate() {
 		if (this.snapped) { return; }
+		this.updated = true;
 		this._y += Math.sin(this.ang) * this.acc;
 		this._x += Math.cos(this.ang) * this.acc;
 
@@ -91,7 +93,25 @@ class Marble {
 		)
 		ctx.stroke();
 		ctx.fill();
-	};
+		ctx.closePath();
+		this.updated = false;
+		this.clearX = this._x;
+		this.clearY = this._y;
+	}
+
+	clear(ctx, scale) {
+		ctx.beginPath();
+		ctx.lineWidth = 2;
+		ctx.fillStyle = "white";
+		ctx.strokeStyle = "white";
+		ctx.arc(
+			this.clearX * scale, this.clearY * scale,
+			(this.radius * scale),  0, 2 * Math.PI, false
+		);
+		ctx.fill();
+		ctx.stroke();
+		ctx.closePath();
+	}
 }
 
 export default Marble;

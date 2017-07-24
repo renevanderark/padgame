@@ -8,10 +8,15 @@ class Launcher {
 		this.acc = 0;
 		this.marble = null;
 		this.collidesWithMarble = collidesWithMarble;
+		this.updated = true;
 	}
 
 	accelerate() {
 		this.ang += this.acc;
+		this.updated = true;
+		if (this.marble) {
+			this.marble.updated = true;
+		}
 	}
 
 	draw(ctx, scale) {
@@ -33,7 +38,19 @@ class Launcher {
 		ctx.lineTo(0, -50 * scale);
 		ctx.fill();
 		ctx.restore();
+		this.updated = false;
+		this.clearX = this._x;
+		this.clearY = this._y;
 	};
+
+	clear(ctx, scale) {
+		ctx.clearRect(
+			this.clearX * scale - 50 * scale,
+			this.clearY * scale - 50 * scale,
+			100 * scale,
+			100 * scale,
+		);
+	}
 }
 
 let launchers = {};

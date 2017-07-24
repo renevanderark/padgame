@@ -21,20 +21,25 @@ const frameRenderer = getFrameRenderer(ctx, VIRT_WIDTH);
 
 const colliders = getColliders(getMarbles);
 
+function getDrawables() {
+	return getMarbles()
+	.concat(getLaunchers())
+	.concat(getLaunchers().map(l => l.marble)
+		.filter(m => m !== null))
+}
 
 const renderLoop = () => {
 	frameRenderer.render(
-		getMarbles()
-		.concat(getLaunchers())
-		.concat(getLaunchers().map(l => l.marble)
-			.filter(m => m !== null))
+		getDrawables()
 	);
 	requestAnimationFrame(renderLoop);
 };
 
 initViewPort(getResizeListeners([can /*, textCan*/],
 	frameRenderer.onResize, /*textRenderer.onResize,*/
-	eventListeners.onResize));
+	eventListeners.onResize, () => {
+		getDrawables().forEach(d => d.updated = true)
+	}));
 
 renderLoop();
 
@@ -104,7 +109,7 @@ const launchMarble = (lIdx) => {
 		getLauncher(lIdx).marble.ang = getLauncher(lIdx).ang - (90 * (Math.PI / 180));
 		addMarble(getLauncher(lIdx).marble);
 		getLauncher(lIdx).marble = null;
-		window.setTimeout(() => reloadLaucher(lIdx), 1000);
+		window.setTimeout(() => reloadLaucher(lIdx), 500);
 	}
 }
 

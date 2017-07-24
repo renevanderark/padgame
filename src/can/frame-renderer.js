@@ -8,10 +8,13 @@ export default (ctx, vWidth) => {
 			scale = w < h ? w / vWidth : h / vWidth;
 		},
 		render: (drawables) => {
-			ctx.clearRect(0, 0, width, height);
-			for (var i = 0; i < drawables.length; i++) {
-				drawables[i].draw(ctx, scale);
-			}
+			ctx.globalCompositeOperation = "destination-out";
+			drawables.filter(d => d.updated)
+				.forEach(d => d.clear(ctx, scale));
+			ctx.globalCompositeOperation = "source-over";
+			drawables.filter(d => d.updated)
+				.forEach(d => d.draw(ctx, scale));
+
 		},
 		drawText: (txt, {x = 50, y = 50, timeout = null, fill = null, font = null, shade = false, shadeDistance = null}) => {
 			const _x = parseInt(Math.ceil(x * scale), 10);
