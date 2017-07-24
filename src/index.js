@@ -7,7 +7,9 @@ import Launcher from "./phyz/launcher";
 import { removeLauncherOtherThan, getLaunchers, getLauncher } from "./phyz/launcher";
 import Marble from "./phyz/marble";
 import getColliders from "./phyz/colliders";
+import { colors } from "./phyz/colors";
 import { addMarble, clearMarbles, getMarbles } from "./phyz/marbles";
+import { getNeighbours } from "./phyz/neighbours";
 import { initPadEvents } from "padevents";
 
 const VIRT_WIDTH = 1000;
@@ -15,6 +17,8 @@ const eventListeners = getEventListeners(VIRT_WIDTH);
 const can = document.getElementById("can");
 const ctx = can.getContext('2d');
 const textCan = document.getElementById("text-can");
+
+can.style.backgroundColor = "rgb(128, 128, 255)";
 // const textCtx = textCan.geftContext('2d');
 const frameRenderer = getFrameRenderer(ctx, VIRT_WIDTH);
 // const textRenderer = getFrameRenderer(textCtx, 380);
@@ -42,14 +46,6 @@ initViewPort(getResizeListeners([can /*, textCan*/],
 	}));
 
 renderLoop();
-
-const baseMarbleOpts = {
-  x: 54,
-  y: 54,
-  radius: 15,
-	collidesWithMarble: colliders.marbleCollidesWithMarble
-};
-
 
 window.setInterval(
   () => {
@@ -95,10 +91,10 @@ const reloadLaucher = (lIdx) => {
 	if (!l.marble) {
 		l.marble = new Marble({
 			x: l._x, y: l._y,
-			stroke: "rgba(255, 255, 0, 0.6)",
-			fill: "rgba(255, 255, 0, 0.85)",
+			color: parseInt(Math.random() * 3),
 			radius: 30, angle: l.ang - (90 * (Math.PI / 180)),
-			collidesWithMarble: colliders.marbleCollidesWithMarble
+			collidesWithMarble: colliders.marbleCollidesWithMarble,
+			getNeighbours: getNeighbours(getMarbles)
 		});
 	}
 }

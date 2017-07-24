@@ -1,17 +1,19 @@
 import uuid from "uuid";
-
+import { fills, strokes } from "./colors";
+import { getNeighbourCoordinates } from "./neighbours"
 class Marble {
 
-	constructor({ x, y, angle, fill, stroke, radius, collidesWithBar, collidesWithMarble }) {
+	constructor({ x, y, angle, color, radius,
+		getNeighbours, collidesWithMarble }) {
 		this._id = uuid();
 		this._x = x;
 		this._y = y;
 		this.acc = 16.0;
 		this.ang = angle;
 		this.radius = radius;
-		this.fill = fill || "red";
-		this.stroke = stroke || "red";
+		this.color = color;
 		this.collidesWithMarble = collidesWithMarble;
+		this.getNeighbours = getNeighbours;
 		this.updated = true;
 	}
 
@@ -58,16 +60,12 @@ class Marble {
 
 		this._y = this.radius;
 		this.snapped = true;
+		console.log(this.getNeighbours(this, this.color));
 	}
 
 	onCollision(otherMarble) {
 		this.snapped = true;
-		const opts = [0, 60, 120, 180, 240, 300]
-			.map(deg => deg * (Math.PI / 180))
-			.map(rad => ({
-				x: Math.round(otherMarble._x + Math.cos(rad) * (otherMarble.radius * 2)),
-				y: Math.round(otherMarble._y + Math.sin(rad) * (otherMarble.radius * 2))
-			}))
+		const opts = getNeighbourCoordinates(otherMarble)
 			.map(({x, y}) => ({
 				x: x,
 				y: y,
@@ -79,21 +77,30 @@ class Marble {
 			.sort((a, b) => a.delta < b.delta ? -1 : 1);
 		this._x = opts[0].x;
 		this._y = opts[0].y;
+		console.log(this.getNeighbours(this, this.color));
 	}
 
 
 	draw(ctx, scale) {
 		ctx.beginPath();
-		ctx.fillStyle = this.fill;
-		ctx.lineWidth = 2;
-		ctx.strokeStyle = this.stroke;
+		ctx.fillStyle = fills[this.color];
 		ctx.arc(
 			this._x * scale, this._y * scale,
 			this.radius * scale,  0, 2 * Math.PI, false
 		)
-		ctx.stroke();
 		ctx.fill();
 		ctx.closePath();
+
+		ctx.beginPath();
+
+		ctx.fillStyle = strokes[this.color];
+		ctx.arc(
+			this._x * scale, this._y * scale,
+			(this.radius * scale) - 4,  Math.PI,  Math.PI * 1.5, false
+		);
+		ctx.fill();
+		ctx.closePath();
+
 		this.updated = false;
 		this.clearX = this._x;
 		this.clearY = this._y;
@@ -101,15 +108,12 @@ class Marble {
 
 	clear(ctx, scale) {
 		ctx.beginPath();
-		ctx.lineWidth = 2;
 		ctx.fillStyle = "white";
-		ctx.strokeStyle = "white";
 		ctx.arc(
 			this.clearX * scale, this.clearY * scale,
-			(this.radius * scale),  0, 2 * Math.PI, false
+			(this.radius + 2) * scale,  0, 2 * Math.PI, false
 		);
 		ctx.fill();
-		ctx.stroke();
 		ctx.closePath();
 	}
 }
