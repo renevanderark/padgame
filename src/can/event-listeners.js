@@ -6,11 +6,11 @@ export default (vWidth) => {
 		onResize: (w, h) => {
 			width = w;
 			height = h;
-			scale = w < h ? w / vWidth : (w / 2) / vWidth;
+			scale = w < h ? w / vWidth : h / vWidth;
 		},
 		add: (eventName, onEvent) => {
 			const fn = ev => onEvent(eventName, ev, scale);
-			
+
 			registered.push({eventName: eventName, fn: fn});
 			window.addEventListener(eventName, fn);
 		},

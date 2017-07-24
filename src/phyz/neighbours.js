@@ -6,17 +6,33 @@ const getNeighbourCoordinates = (marble) =>
       y: Math.round(marble._y + Math.sin(rad) * (marble.radius * 2))
     }));
 
-const getNeighbours = (getMarbles) =>
-  (marble, colorFilter = null) => {
-    const neighbourCoords = getNeighbourCoordinates(marble);
+const getNeighbours = (getMarbles) => {
+  const _markNeighbours = (marble, colorFilter = null) => {
+    marble.marked = true;
 
-    return getMarbles()
-      .filter(m => colorFilter ? marble.color === colorFilter : true)
+    const neighbourCoords = getNeighbourCoordinates(marble);
+    getMarbles()
       .filter(m => neighbourCoords.map(nC =>
           m._x >  nC.x - m.radius &&
           m._x < nC.x + m.radius &&
           m._y > nC.y - m.radius &&
           m._y < nC.y + m.radius).indexOf(true) > -1
-      );
+      )
+      .filter(m => !m.marked)
+      .filter(m => colorFilter === null ? true : m.color === colorFilter)
+      .forEach(m => _markNeighbours(m, colorFilter));
+  };
+
+  const markNeighbours = (marble, colorFilter = null) => {
+    _markNeighbours(marble, colorFilter);
+    const marked = getMarbles().filter(m => m.marked);
+    marked.forEach(m => m.marked = false);
+    return marked;
   }
+
+  return {
+    getNeighbours: markNeighbours
+  };
+}
+
 export { getNeighbourCoordinates, getNeighbours }

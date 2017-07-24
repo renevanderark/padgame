@@ -8,7 +8,9 @@ const addMarble = (toAdd = []) => {
 const clearMarbles = () =>
 	marbles = [];
 
+const removeReadyMarbles = () =>
+	marbles = marbles.filter(m => !m.readyToBeRemoved)
 
 const getMarbles = () => marbles;
 
-export { addMarble, clearMarbles, getMarbles }
+export { addMarble, clearMarbles, getMarbles, removeReadyMarbles }

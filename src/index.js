@@ -8,7 +8,7 @@ import { removeLauncherOtherThan, getLaunchers, getLauncher } from "./phyz/launc
 import Marble from "./phyz/marble";
 import getColliders from "./phyz/colliders";
 import { colors } from "./phyz/colors";
-import { addMarble, clearMarbles, getMarbles } from "./phyz/marbles";
+import { addMarble, clearMarbles, getMarbles, removeReadyMarbles } from "./phyz/marbles";
 import { getNeighbours } from "./phyz/neighbours";
 import { initPadEvents } from "padevents";
 
@@ -49,6 +49,7 @@ renderLoop();
 
 window.setInterval(
   () => {
+		removeReadyMarbles();
 		getLaunchers().forEach(l => {
 			l.accelerate();
 		})
@@ -91,10 +92,13 @@ const reloadLaucher = (lIdx) => {
 	if (!l.marble) {
 		l.marble = new Marble({
 			x: l._x, y: l._y,
-			color: parseInt(Math.random() * 3),
+			color: parseInt(Math.random() * 3) + 1,
 			radius: 30, angle: l.ang - (90 * (Math.PI / 180)),
 			collidesWithMarble: colliders.marbleCollidesWithMarble,
-			getNeighbours: getNeighbours(getMarbles)
+			getNeighbours: getNeighbours(getMarbles).getNeighbours,
+			onRedrawRequired: () => {
+				getMarbles().forEach(m => {m.updated = true})
+			}
 		});
 	}
 }
@@ -113,7 +117,7 @@ window.addEventListener("gamepad-l-axis-x-change", ({detail: {force, controllerI
 	//console.log(controllerIndex);
 	getLauncher(controllerIndex).acc =
 		Math.abs(force) === 100 ?
-			force * 0.0002 : 0;
+			force * 0.0001 : 0;
 });
 
 window.addEventListener("gamepad-a-pressed", ({detail: { controllerIndex }}) => {

@@ -11,6 +11,7 @@ export default (ctx, vWidth) => {
 			ctx.globalCompositeOperation = "destination-out";
 			drawables.filter(d => d.updated)
 				.forEach(d => d.clear(ctx, scale));
+				
 			ctx.globalCompositeOperation = "source-over";
 			drawables.filter(d => d.updated)
 				.forEach(d => d.draw(ctx, scale));

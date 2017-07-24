@@ -1,10 +1,10 @@
 import uuid from "uuid";
-import { fills, strokes } from "./colors";
+import { fills, strokes, colors } from "./colors";
 import { getNeighbourCoordinates } from "./neighbours"
 class Marble {
 
 	constructor({ x, y, angle, color, radius,
-		getNeighbours, collidesWithMarble }) {
+		getNeighbours, collidesWithMarble, onRedrawRequired }) {
 		this._id = uuid();
 		this._x = x;
 		this._y = y;
@@ -15,6 +15,7 @@ class Marble {
 		this.collidesWithMarble = collidesWithMarble;
 		this.getNeighbours = getNeighbours;
 		this.updated = true;
+		this.onRedrawRequired = onRedrawRequired;
 	}
 
 	accelerate() {
@@ -60,7 +61,7 @@ class Marble {
 
 		this._y = this.radius;
 		this.snapped = true;
-		console.log(this.getNeighbours(this, this.color));
+		this.markNeighbours();
 	}
 
 	onCollision(otherMarble) {
@@ -77,9 +78,28 @@ class Marble {
 			.sort((a, b) => a.delta < b.delta ? -1 : 1);
 		this._x = opts[0].x;
 		this._y = opts[0].y;
-		console.log(this.getNeighbours(this, this.color));
+
+		this.markNeighbours();
 	}
 
+	markNeighbours() {
+		const nSameColor = this.getNeighbours(this, this.color);
+		if (nSameColor.length > 2) {
+			nSameColor.forEach(m => {
+				m.markForRemoval()
+			})
+		}
+	}
+
+	markForRemoval() {
+		this.color = colors.WHITE;
+		this.updated = true;
+		setTimeout(() => {
+			this.markedForRemoval = true;
+			this.updated = true;
+			this.onRedrawRequired();
+		}, 50);
+	}
 
 	draw(ctx, scale) {
 		ctx.beginPath();
@@ -111,10 +131,15 @@ class Marble {
 		ctx.fillStyle = "white";
 		ctx.arc(
 			this.clearX * scale, this.clearY * scale,
-			(this.radius + 2) * scale,  0, 2 * Math.PI, false
+			(this.radius + (this.readyToBeRemoved ? 0 : 2)) * scale,  0, 2 * Math.PI, false
 		);
 		ctx.fill();
 		ctx.closePath();
+
+		if (this.markedForRemoval) {
+			this.readyToBeRemoved = true;
+			this.updated = false;
+		}
 	}
 }
 
