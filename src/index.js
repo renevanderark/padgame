@@ -19,36 +19,46 @@ const ballLayer = document.getElementById("ball-layer");
 const ballLayerCtx = ballLayer.getContext('2d');
 const snapLayer = document.getElementById("snap-layer");
 const snapLayerCtx = snapLayer.getContext("2d");
+const launcherLayer = document.getElementById("launcher-layer");
+const launcherLayerCtx = launcherLayer.getContext("2d")
 
 const ballFrameRenderer = getFrameRenderer(ballLayerCtx, VIRT_WIDTH);
 const snapFrameRenderer = getFrameRenderer(snapLayerCtx, VIRT_WIDTH);
+const launcherFrameRenderer = getFrameRenderer(launcherLayerCtx, VIRT_WIDTH);
 const colliders = getColliders(getMarbles);
 const getNeighboursImpl = getNeighbours(getMarbles);
 
 
 function getBallLayerDrawables() {
 	return getMarbles().filter(m => !m.snapped)
-		.concat(getLaunchers())
 		.concat(getLaunchers().map(l => l.marble)
 		.filter(m => m !== null))
+}
+
+function getLauncherLayerDrawables() {
+	return getLaunchers();
 }
 
 function getSnapLayerDrawables() {
 	return getMarbles().filter(m => m.snapped);
 }
 
+
 const getDrawables = () =>
-	getBallLayerDrawables().concat(getSnapLayerDrawables())
+	getBallLayerDrawables()
+		.concat(getSnapLayerDrawables())
+		.concat(getLauncherLayerDrawables());
 
 const forceRedraw = () => {
-	[ballFrameRenderer, snapFrameRenderer]
+	[ballFrameRenderer, snapFrameRenderer, launcherFrameRenderer]
 		.forEach(frame => frame.clear());
 	getDrawables().forEach(d => d.updated = true);
 };
 
-initViewPort(getResizeListeners([ballLayer, snapLayer],
+initViewPort(getResizeListeners([ballLayer, snapLayer, launcherLayer],
 	ballFrameRenderer.onResize,
 	snapFrameRenderer.onResize,
+	launcherFrameRenderer.onResize,
 	forceRedraw
 ));
 
@@ -59,11 +69,13 @@ const renderLoop = () => {
 	snapFrameRenderer.render(
 		getSnapLayerDrawables()
 	);
+	launcherFrameRenderer.render(
+		getLauncherLayerDrawables()
+	);
 	requestAnimationFrame(renderLoop);
 };
 
 renderLoop();
-
 
 
 window.setInterval(
@@ -136,7 +148,7 @@ const addRows = (rows) => {
 
 addRows(5);
 
-window.setInterval(() => addRows(2), 20000);
+//window.setInterval(() => addRows(2), 20000);
 
 
 const reinitLaunchers = (controllerIndices) => {
