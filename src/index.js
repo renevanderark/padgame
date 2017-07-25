@@ -77,6 +77,68 @@ window.setInterval(
   10
 );
 
+
+const reloadLaucher = (lIdx) => {
+	const l = getLauncher(lIdx);
+	if (!l.marble) {
+		l.marble = new Marble({
+			x: l._x, y: l._y,
+			color: parseInt(Math.random() * 3) + 1,
+			radius: 30, angle: l.ang - (90 * (Math.PI / 180)),
+			collidesWithMarble: colliders.marbleCollidesWithMarble,
+			getNeighbours: getNeighboursImpl.getNeighbours,
+			detectFall: getNeighboursImpl.detectFall,
+			clearScreen: forceRedraw
+		});
+	}
+}
+
+const launchMarble = (lIdx) => {
+	if (getLauncher(lIdx).marble) {
+		getLauncher(lIdx).marble.ang = getLauncher(lIdx).ang - (90 * (Math.PI / 180));
+		addMarble(getLauncher(lIdx).marble);
+		getLauncher(lIdx).marble = null;
+		window.setTimeout(() => reloadLaucher(lIdx), 500);
+	}
+}
+
+window.addEventListener("gamepad-l-axis-x-change", ({detail: {force, controllerIndex}}) => {
+	getLauncher(controllerIndex).acc =
+		Math.abs(force) === 100 ?
+			force * 0.0001 : 0;
+});
+
+window.addEventListener("gamepad-a-pressed", ({detail: { controllerIndex }}) => {
+	launchMarble(controllerIndex);
+});
+
+
+const marbleRadius = 30;
+const baseMarbleOpts = {
+	radius: marbleRadius,
+	angle: 90 * (Math.PI / 180),
+	snapped: true,
+	collidesWithMarble: colliders.marbleCollidesWithMarble,
+	getNeighbours: getNeighboursImpl.getNeighbours,
+	detectFall: getNeighboursImpl.detectFall,
+	clearScreen: forceRedraw
+};
+const addRows = (rows) => {
+	for (let row = 0; row < rows; row++) {
+		getMarbles().filter(m => m.snapped)
+			.forEach(m => m.descend())
+		for (let i = 0; i < VIRT_WIDTH; i += marbleRadius * 2) {
+			addMarble(new Marble({...baseMarbleOpts, x: i + marbleRadius, y: marbleRadius, color: parseInt(Math.random() * 3) + 1}));
+		}
+	}
+	getNeighboursImpl.detectFall();
+}
+
+addRows(5);
+
+window.setInterval(() => addRows(2), 20000);
+
+
 const reinitLaunchers = (controllerIndices) => {
 
 	controllerIndices
@@ -105,82 +167,5 @@ const reinitLaunchers = (controllerIndices) => {
 		}
 	}
 }
-
-const reloadLaucher = (lIdx) => {
-	const l = getLauncher(lIdx);
-	if (!l.marble) {
-		l.marble = new Marble({
-			x: l._x, y: l._y,
-			color: parseInt(Math.random() * 3) + 1,
-			radius: 30, angle: l.ang - (90 * (Math.PI / 180)),
-			collidesWithMarble: colliders.marbleCollidesWithMarble,
-			getNeighbours: getNeighboursImpl.getNeighbours,
-			detectFall: getNeighboursImpl.detectFall,
-			clearScreen: forceRedraw
-		});
-	}
-}
-
-const launchMarble = (lIdx) => {
-
-	if (getLauncher(lIdx).marble) {
-		getLauncher(lIdx).marble.ang = getLauncher(lIdx).ang - (90 * (Math.PI / 180));
-		addMarble(getLauncher(lIdx).marble);
-		getLauncher(lIdx).marble = null;
-		window.setTimeout(() => reloadLaucher(lIdx), 500);
-	}
-}
-
-window.addEventListener("gamepad-l-axis-x-change", ({detail: {force, controllerIndex}}) => {
-	//console.log(controllerIndex);
-	getLauncher(controllerIndex).acc =
-		Math.abs(force) === 100 ?
-			force * 0.0001 : 0;
-});
-
-window.addEventListener("gamepad-a-pressed", ({detail: { controllerIndex }}) => {
-	launchMarble(controllerIndex);
-});
-
-const marbleRadius = 30;
-const baseMarbleOpts = {
-	radius: marbleRadius,
-	angle: 90 * (Math.PI / 180),
-	snapped: true,
-	collidesWithMarble: colliders.marbleCollidesWithMarble,
-	getNeighbours: getNeighboursImpl.getNeighbours,
-	detectFall: getNeighboursImpl.detectFall,
-	clearScreen: forceRedraw
-};
-
-for (let row = 0; row < 10; row++) {
-	getMarbles().filter(m => m.snapped)
-		.forEach(m => m.descend())
-	for (let i = 0; i < VIRT_WIDTH; i += marbleRadius * 2) {
-		addMarble(new Marble({...baseMarbleOpts, x: i + marbleRadius, y: marbleRadius, color: parseInt(Math.random() * 3) + 1}));
-	}
-}
-/*getMarbles().filter(m => m.snapped)
-	.forEach(m => m.descend())*/
-/*
-window.addEventListener("keydown", (ev) => {
-	reinitLaunchers(["1"]);
-	if (ev.keyCode === 37) {
-		getLauncher("1").acc = -0.01;
-	}
-	if (ev.keyCode === 39) {
-		getLauncher("1").acc = 0.01;
-	}
-	if (ev.keyCode === 32) {
-		launchMarble("1");
-	}
-});
-
-window.addEventListener("keyup", (ev) => {
-	if (ev.keyCode === 37 || ev.keyCode === 39) {
-		getLauncher("1").acc = 0;
-	}
-});
-*/
 
 initPadEvents({ onControllersChange: reinitLaunchers});
