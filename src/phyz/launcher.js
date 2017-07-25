@@ -1,6 +1,8 @@
 import VIRT_WIDTH from "./virt-width";
 
 const maxAcc = 0.1;
+const minAng = -1.5;
+const maxAng = 1.5;
 class Launcher {
 
 	constructor({ x, y, fill, collidesWithMarble }) {
@@ -16,23 +18,57 @@ class Launcher {
 	}
 
 	accelerate() {
+		const prevAng = this.ang;
 		if (this.acc < maxAcc && this.acc > -maxAcc) {
 			this.acc += 0.0005 * this.accDir;
 		}
 		this.ang += this.acc;
-		this.updated = true;
-		if (this.marble) {
-			this.marble.updated = true;
+		if (this.ang < minAng) {
+			this.ang = minAng;
+		}
+		if (this.ang > maxAng) {
+			this.ang = maxAng;
+		}
+
+		if (this.ang !== prevAng) {
+			this.updated = true;
+			if (this.marble) {
+				this.marble.updated = true;
+			}
 		}
 	}
 
-	draw(ctx, scale) {
+	drawGuide(ctx, scale, X, Y, ANG) {
+		let x = X, y = Y, ang = ANG,
+			minX = X, minY = Y, maxX = X, maxY = Y;
 		ctx.beginPath();
 		ctx.strokeStyle = "rgba(255, 128, 128, 0.9)";
-		ctx.moveTo(this._x * scale, this._y * scale);
-		ctx.lineTo((this._x * scale) + Math.cos(this.ang - (90 * (Math.PI / 180))) * VIRT_WIDTH,
-			(this._y * scale) + Math.sin(this.ang - (90 * (Math.PI / 180))) * VIRT_WIDTH)
+		ctx.moveTo(x * scale, y * scale);
+
+		while (y > 0) {
+			x = x + Math.cos(ang);
+			y = y + Math.sin(ang);
+			minY = y < minY ? y : minY;
+			maxY = y > maxY ? y : maxY;
+			minX = x < minX ? x : minX;
+			maxX = x > maxX ? x : maxX;
+			if (x <= 0 || x >= VIRT_WIDTH) {
+				const xDeg = y >= VIRT_WIDTH ? 0 : 90;
+				const yDeg = ang / (Math.PI / 180);
+				const zDeg = Math.PI + (2*xDeg) - yDeg;
+				ang = zDeg * (Math.PI / 180);
+				ctx.lineTo(x * scale, y * scale);
+			}
+		}
+		ctx.lineTo(x * scale, y * scale);
 		ctx.stroke();
+		this.clearRect = [minX - 2, minY - 2,
+			 maxX - minX + 4, maxY - minY + 4];
+	}
+
+	draw(ctx, scale) {
+		this.drawGuide(ctx, scale, this._x, this._y,
+			this.ang - (90 * (Math.PI / 180)));
 
 		ctx.save();
 		ctx.translate(this._x * scale, this._y * scale);
@@ -61,8 +97,13 @@ class Launcher {
 
 	clear(ctx, scale) {
 		ctx.clearRect(
-			0, 0, VIRT_WIDTH * scale, VIRT_WIDTH * scale
+			(this.clearX - 50) * scale,
+			(this.clearY - 50) * scale,
+			100 * scale, 100 * scale
 		);
+		if (this.clearRect) {
+			ctx.clearRect(...(this.clearRect.map(n => n * scale)));
+		}
 	}
 }
 
