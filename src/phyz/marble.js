@@ -34,6 +34,7 @@ class Marble {
 			} else {
 				this.acc += 0.01;
 			}
+			this.updated = true;
 		}
 
 		this.updated = true;
@@ -60,10 +61,22 @@ class Marble {
 			this.snapToTop();
 		}
 
-		const other = this.collidesWithMarble(this);
-		if (other) {
-			this.onCollision(other);
+		if (!this.falling) {
+			const other = this.collidesWithMarble(this);
+			if (other) {
+				this.onCollision(other);
+			}
 		}
+	}
+
+	descend() {
+		const deg = Math.round(this._x) % (this.radius * 2) === 0 ?
+			120 : 60;
+		this._x =
+			this._x + Math.cos(deg * Math.PI / 180) * (this.radius * 2);
+		this._y =
+			this._y + Math.sin(deg * Math.PI / 180) * (this.radius * 2);
+		this.updated = true;
 	}
 
 	startFalling() {
@@ -100,16 +113,12 @@ class Marble {
 			.sort((a, b) => a.delta < b.delta ? -1 : 1);
 		this._x = opts[0].x;
 		this._y = opts[0].y;
-
 		this.finalizeSnap();
 	}
 
 	finalizeSnap() {
 		this.snapped = true;
 		this.markNeighbours();
-		setTimeout(() => {
-			this.detectFall();
-		}, 150);
 		this.clearScreen();
 	}
 
@@ -119,6 +128,9 @@ class Marble {
 			nSameColor.forEach(m => {
 				m.markForRemoval()
 			})
+			setTimeout(() => {
+				this.detectFall();
+			}, 150);
 		}
 	}
 

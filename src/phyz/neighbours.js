@@ -45,7 +45,6 @@ const getNeighbours = (getMarbles) => {
 
   const detectFall = () => {
     let snappedToTop = [];
-    let start = new Date().getTime();
 
     const snappedFound = getMarbles().filter(m =>
       m.snapped && !(m.markedForRemoval || m.readyToBeRemoved));
@@ -59,13 +58,19 @@ const getNeighbours = (getMarbles) => {
           }))
       );
     }
-    const neighboursOfTop = snappedToTop
-      .map(marble => markNeighbours(marble, null, snappedFound))
-      .reduce((a, b) => a.concat(b), [])
-      .map(m => m._id);
+
+    for (let i = 0; i < snappedToTop.length; i++) {
+      if (!snappedToTop[i].marked) {
+        _markNeighbours(snappedToTop[i], null, snappedFound);
+      }
+    }
+
+    const neighboursOfTop = snappedFound.filter(m => m.marked);
+    neighboursOfTop.forEach(m => {m.marked = false});
+    const neighboursOfTopIds = neighboursOfTop.map(m => m._id);
 
     snappedFound.filter(m =>
-      neighboursOfTop.indexOf(m._id) < 0
+      neighboursOfTopIds.indexOf(m._id) < 0
     ).forEach(m => m.startFalling());
 
   }

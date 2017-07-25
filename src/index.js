@@ -153,16 +153,15 @@ const baseMarbleOpts = {
 	clearScreen: forceRedraw
 };
 
-for (let i = 0; i < VIRT_WIDTH; i += marbleRadius * 2) {
-	addMarble(new Marble({...baseMarbleOpts, x: i + marbleRadius, y: marbleRadius, color: parseInt(Math.random() * 3) + 1}));
-	addMarble(new Marble({...baseMarbleOpts,
-		x: i + (4 * marbleRadius) * Math.cos(60 * (Math.PI / 180)),
-		y: (3.1 * marbleRadius) * Math.sin(60 * (Math.PI / 180)),
-		color: parseInt(Math.random() * 3) + 1}));
-
-	addMarble(new Marble({...baseMarbleOpts, x: i + marbleRadius, y: marbleRadius * 4.4, color: parseInt(Math.random() * 3) + 1}));
-
+for (let row = 0; row < 10; row++) {
+	getMarbles().filter(m => m.snapped)
+		.forEach(m => m.descend())
+	for (let i = 0; i < VIRT_WIDTH; i += marbleRadius * 2) {
+		addMarble(new Marble({...baseMarbleOpts, x: i + marbleRadius, y: marbleRadius, color: parseInt(Math.random() * 3) + 1}));
+	}
 }
+/*getMarbles().filter(m => m.snapped)
+	.forEach(m => m.descend())*/
 /*
 window.addEventListener("keydown", (ev) => {
 	reinitLaunchers(["1"]);
