@@ -17,33 +17,42 @@ const getNeighbours = (getMarbles) => {
     m._y > nC.y - m.radius &&
     m._y < nC.y + m.radius;
 
-  const _markNeighbours = (marble, colorFilter = null) => {
-    marble.marked = true;
+  const _markNeighbours = (root, colorFilter = null, altList = null) => {
+    let stack = [root];
 
-    const neighbourCoords = getNeighbourCoordinates(marble);
-    getMarbles()
-      .filter(m => neighbourCoords
-        .map(nC => isLocatedAround(m, nC))
-          .indexOf(true) > -1
-      )
-      .filter(m => !m.marked)
-      .filter(m => colorFilter === null ? true : m.color === colorFilter)
-      .forEach(m => _markNeighbours(m, colorFilter));
+    while (stack.length > 0) {
+      const marble = stack.pop();
+      marble.marked = true;
+      const neighbourCoords = getNeighbourCoordinates(marble);
+      stack = stack.concat(
+        (altList || getMarbles())
+        .filter(m => !m.marked)
+        .filter(m => colorFilter === null ? true : m.color === colorFilter)
+        .filter(m => neighbourCoords
+          .map(nC => isLocatedAround(m, nC))
+            .indexOf(true) > -1
+        )
+      );
+    }
   };
 
-  const markNeighbours = (marble, colorFilter = null) => {
-    _markNeighbours(marble, colorFilter);
-    const marked = getMarbles().filter(m => m.marked);
+  const markNeighbours = (marble, colorFilter = null, altList = null) => {
+    _markNeighbours(marble, colorFilter, altList);
+    const marked = (altList || getMarbles()).filter(m => m.marked);
     marked.forEach(m => m.marked = false);
     return marked;
   }
 
-  const detectFall = (clearScreen) => {
+  const detectFall = () => {
     let snappedToTop = [];
+    let start = new Date().getTime();
+
+    const snappedFound = getMarbles().filter(m =>
+      m.snapped && !(m.markedForRemoval || m.readyToBeRemoved));
+
     for (let i = 0; i < VIRT_WIDTH; i += marbleRadius * 2) {
       snappedToTop = snappedToTop.concat(
-        getMarbles().filter(m =>
-          m.snapped && !(m.markedForRemoval || m.readyToBeRemoved) &&
+        snappedFound.filter(m =>
           isLocatedAround(m, {
             x: i + marbleRadius,
             y: marbleRadius
@@ -51,18 +60,14 @@ const getNeighbours = (getMarbles) => {
       );
     }
     const neighboursOfTop = snappedToTop
-      .map(marble => markNeighbours(marble))
+      .map(marble => markNeighbours(marble, null, snappedFound))
       .reduce((a, b) => a.concat(b), [])
       .map(m => m._id);
 
-    const toFall = getMarbles().filter(m =>
-      m.snapped && !(m.markedForRemoval || m.readyToBeRemoved) &&
+    snappedFound.filter(m =>
       neighboursOfTop.indexOf(m._id) < 0
-    );
-    if (toFall.length > 0) {
-      toFall.forEach(m => m.startFalling());
-      clearScreen();
-    }
+    ).forEach(m => m.startFalling());
+
   }
 
   return {

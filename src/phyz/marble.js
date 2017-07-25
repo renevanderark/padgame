@@ -107,6 +107,9 @@ class Marble {
 	finalizeSnap() {
 		this.snapped = true;
 		this.markNeighbours();
+		setTimeout(() => {
+			this.detectFall();
+		}, 150);
 		this.clearScreen();
 	}
 

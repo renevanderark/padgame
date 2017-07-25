@@ -64,8 +64,7 @@ const renderLoop = () => {
 
 renderLoop();
 
-window.setInterval(() =>
-	getNeighboursImpl.detectFall(forceRedraw), 200);
+
 
 window.setInterval(
   () => {
@@ -155,12 +154,14 @@ const baseMarbleOpts = {
 };
 
 for (let i = 0; i < VIRT_WIDTH; i += marbleRadius * 2) {
-	addMarble(new Marble({
-		...baseMarbleOpts,
-		x: i + marbleRadius,
-		y: marbleRadius,
-		color: parseInt(Math.random() * 3) + 1,
-	}));
+	addMarble(new Marble({...baseMarbleOpts, x: i + marbleRadius, y: marbleRadius, color: parseInt(Math.random() * 3) + 1}));
+	addMarble(new Marble({...baseMarbleOpts,
+		x: i + (4 * marbleRadius) * Math.cos(60 * (Math.PI / 180)),
+		y: (3.1 * marbleRadius) * Math.sin(60 * (Math.PI / 180)),
+		color: parseInt(Math.random() * 3) + 1}));
+
+	addMarble(new Marble({...baseMarbleOpts, x: i + marbleRadius, y: marbleRadius * 4.4, color: parseInt(Math.random() * 3) + 1}));
+
 }
 /*
 window.addEventListener("keydown", (ev) => {
