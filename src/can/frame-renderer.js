@@ -1,5 +1,6 @@
 export default (ctx, vWidth) => {
 	let width, height, scale;
+	let clearRequested = false;
 
 	return {
 		onResize: (w, h) => {
@@ -8,12 +9,16 @@ export default (ctx, vWidth) => {
 			scale = w < h ? w / vWidth : h / vWidth;
 		},
 		clear: () => {
-			ctx.clearRect(0, 0, width, height);
+			clearRequested = true;
 		},
 		render: (drawables) => {
-			drawables.filter(d => d.updated)
-				.forEach(d => d.clear(ctx, scale));
-
+			if (clearRequested) {
+				ctx.clearRect(0, 0, width, height);
+				clearRequested = false;
+			} else {
+				drawables.filter(d => d.updated)
+					.forEach(d => d.clear(ctx, scale));
+			}
 			drawables.filter(d => d.updated)
 				.forEach(d => d.draw(ctx, scale));
 
