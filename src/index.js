@@ -28,7 +28,6 @@ const launcherFrameRenderer = getFrameRenderer(launcherLayerCtx, VIRT_WIDTH);
 const colliders = getColliders(getMarbles);
 const getNeighboursImpl = getNeighbours(getMarbles);
 
-
 function getBallLayerDrawables() {
 	return getMarbles().filter(m => !m.snapped)
 		.concat(getLaunchers().map(l => l.marble)
@@ -153,8 +152,7 @@ const addRows = (rows) => {
 
 addRows(5);
 
-window.setInterval(() => addRows(2), 60000);
-
+window.setInterval(() => addRows(2), 30000);
 
 const reinitLaunchers = (controllerIndices) => {
 

@@ -3,6 +3,13 @@ import VIRT_WIDTH from "./virt-width";
 const maxAcc = 0.1;
 const minAng = -1.5;
 const maxAng = 1.5;
+
+let launchers = {};
+
+const getLaunchers = () =>
+	Object.keys(launchers).map(k => launchers[k]);
+
+
 class Launcher {
 
 	constructor({ x, y, fill, collidesWithMarble }) {
@@ -31,10 +38,12 @@ class Launcher {
 		}
 
 		if (this.ang !== prevAng) {
-			this.updated = true;
-			if (this.marble) {
-				this.marble.updated = true;
-			}
+			getLaunchers().forEach(l => {
+				l.updated = true
+				if (l.marble) {
+					l.marble.updated = true;
+				}
+			})
 		}
 	}
 
@@ -107,10 +116,6 @@ class Launcher {
 	}
 }
 
-let launchers = {};
-
-const getLaunchers = () =>
-	Object.keys(launchers).map(k => launchers[k]);
 
 const putLauncher = (idx, launcher) => {
 	launchers[idx] = launchers[idx] || launcher;
