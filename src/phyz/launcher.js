@@ -1,8 +1,10 @@
+import VIRT_WIDTH from "./virt-width";
+
 class Launcher {
 
 	constructor({ x, y, fill, collidesWithMarble }) {
-		this._x = x || 500;
-		this._y = y || 950;
+		this._x = x || VIRT_WIDTH / 2;
+		this._y = y || VIRT_WIDTH - 50;
 		this.ang = 0;
 		this.fill = fill || "black";
 		this.acc = 0;

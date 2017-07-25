@@ -12,38 +12,53 @@ import { addMarble, clearMarbles, getMarbles, removeReadyMarbles } from "./phyz/
 import { getNeighbours } from "./phyz/neighbours";
 import { initPadEvents } from "padevents";
 
-const VIRT_WIDTH = 1000;
+import VIRT_WIDTH from "./phyz/virt-width";
+
 const eventListeners = getEventListeners(VIRT_WIDTH);
-const can = document.getElementById("can");
-const ctx = can.getContext('2d');
-const textCan = document.getElementById("text-can");
+const ballLayer = document.getElementById("ball-layer");
+const ballLayerCtx = ballLayer.getContext('2d');
+const snapLayer = document.getElementById("snap-layer");
+const snapLayerCtx = snapLayer.getContext("2d");
 
-can.style.backgroundColor = "rgb(128, 128, 255)";
-// const textCtx = textCan.geftContext('2d');
-const frameRenderer = getFrameRenderer(ctx, VIRT_WIDTH);
-// const textRenderer = getFrameRenderer(textCtx, 380);
-
+const ballFrameRenderer = getFrameRenderer(ballLayerCtx, VIRT_WIDTH);
+const snapFrameRenderer = getFrameRenderer(snapLayerCtx, VIRT_WIDTH);
 const colliders = getColliders(getMarbles);
 
-function getDrawables() {
-	return getMarbles()
-	.concat(getLaunchers())
-	.concat(getLaunchers().map(l => l.marble)
+function getBallLayerDrawables() {
+	return getMarbles().filter(m => !m.snapped)
+		.concat(getLaunchers())
+		.concat(getLaunchers().map(l => l.marble)
 		.filter(m => m !== null))
 }
 
+function getSnapLayerDrawables() {
+	return getMarbles().filter(m => m.snapped);
+}
+
+const getDrawables = () =>
+	getBallLayerDrawables().concat(getSnapLayerDrawables())
+
+const forceRedraw = () => {
+	[ballFrameRenderer, snapFrameRenderer]
+		.forEach(frame => frame.clear());
+	getDrawables().forEach(d => d.updated = true);
+};
+
+initViewPort(getResizeListeners([ballLayer, snapLayer],
+	ballFrameRenderer.onResize,
+	snapFrameRenderer.onResize,
+	forceRedraw
+));
+
 const renderLoop = () => {
-	frameRenderer.render(
-		getDrawables()
+	ballFrameRenderer.render(
+		getBallLayerDrawables()
+	);
+	snapFrameRenderer.render(
+		getSnapLayerDrawables()
 	);
 	requestAnimationFrame(renderLoop);
 };
-
-initViewPort(getResizeListeners([can /*, textCan*/],
-	frameRenderer.onResize, /*textRenderer.onResize,*/
-	eventListeners.onResize, () => {
-		getDrawables().forEach(d => d.updated = true)
-	}));
 
 renderLoop();
 
@@ -96,9 +111,7 @@ const reloadLaucher = (lIdx) => {
 			radius: 30, angle: l.ang - (90 * (Math.PI / 180)),
 			collidesWithMarble: colliders.marbleCollidesWithMarble,
 			getNeighbours: getNeighbours(getMarbles).getNeighbours,
-			onRedrawRequired: () => {
-				getMarbles().forEach(m => {m.updated = true})
-			}
+			clearScreen: forceRedraw
 		});
 	}
 }
@@ -143,6 +156,5 @@ window.addEventListener("keyup", (ev) => {
 	}
 });
 */
-
 
 initPadEvents({ onControllersChange: reinitLaunchers});

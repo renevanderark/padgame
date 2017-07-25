@@ -7,12 +7,13 @@ export default (ctx, vWidth) => {
 			height = h;
 			scale = w < h ? w / vWidth : h / vWidth;
 		},
+		clear: () => {
+			ctx.clearRect(0, 0, width, height);
+		},
 		render: (drawables) => {
-			ctx.globalCompositeOperation = "destination-out";
 			drawables.filter(d => d.updated)
 				.forEach(d => d.clear(ctx, scale));
-				
-			ctx.globalCompositeOperation = "source-over";
+
 			drawables.filter(d => d.updated)
 				.forEach(d => d.draw(ctx, scale));
 
