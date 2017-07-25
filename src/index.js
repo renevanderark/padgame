@@ -102,15 +102,17 @@ const reinitLaunchers = (controllerIndices) => {
 	}
 }
 
+const getNeighboursImpl = getNeighbours(getMarbles);
 const reloadLaucher = (lIdx) => {
 	const l = getLauncher(lIdx);
 	if (!l.marble) {
 		l.marble = new Marble({
 			x: l._x, y: l._y,
-			color: parseInt(Math.random() * 3) + 1,
+			color: parseInt(Math.random() * 2) + 1,
 			radius: 30, angle: l.ang - (90 * (Math.PI / 180)),
 			collidesWithMarble: colliders.marbleCollidesWithMarble,
-			getNeighbours: getNeighbours(getMarbles).getNeighbours,
+			getNeighbours: getNeighboursImpl.getNeighbours,
+			detectFall: getNeighboursImpl.detectFall,
 			clearScreen: forceRedraw
 		});
 	}

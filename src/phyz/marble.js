@@ -5,7 +5,7 @@ import VIRT_WIDTH from "./virt-width";
 
 class Marble {
 
-	constructor({ x, y, angle, color, radius,
+	constructor({ x, y, angle, color, radius, detectFall,
 		getNeighbours, collidesWithMarble, clearScreen }) {
 		this._id = uuid();
 		this._x = x;
@@ -16,12 +16,25 @@ class Marble {
 		this.color = color;
 		this.collidesWithMarble = collidesWithMarble;
 		this.getNeighbours = getNeighbours;
+		this.detectFall = detectFall;
 		this.updated = true;
 		this.clearScreen = clearScreen;
+		this.markedForRemoval = false;
+		this.readyToBeRemoved = false;
+		this.falling = false;
 	}
 
 	accelerate() {
 		if (this.snapped) { return; }
+		if (this.falling) {
+			this.acc += 0.01;
+			if (this._y > VIRT_WIDTH - this.radius * 2) {
+				this.markedForRemoval = true;
+				this.readyToBeRemoved = true;
+				this.clearScreen();
+			}
+		}
+
 		this.updated = true;
 		this._y += Math.sin(this.ang) * this.acc;
 		this._x += Math.cos(this.ang) * this.acc;
@@ -52,10 +65,11 @@ class Marble {
 		}
 	}
 
-	finalizeSnap() {
-		this.snapped = true;
-		this.markNeighbours();
-		this.clearScreen();
+	startFalling() {
+		this.updated = true;
+		this.falling = true;
+		this.snapped = false;
+		this.ang = 90 * (Math.PI / 180);
 	}
 
 	snapToTop() {
@@ -88,6 +102,13 @@ class Marble {
 		this.finalizeSnap();
 	}
 
+	finalizeSnap() {
+		this.snapped = true;
+		this.markNeighbours();
+		this.detectFall();
+		this.clearScreen();
+	}
+
 	markNeighbours() {
 		const nSameColor = this.getNeighbours(this, this.color);
 		if (nSameColor.length > 2) {
@@ -98,6 +119,7 @@ class Marble {
 	}
 
 	markForRemoval() {
+		this.markedForRemoval = true;
 		this.color = colors.WHITE;
 		this.updated = true;
 		setTimeout(() => {
