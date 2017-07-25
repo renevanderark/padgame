@@ -1,5 +1,6 @@
 import VIRT_WIDTH from "./virt-width";
 
+const maxAcc = 0.1;
 class Launcher {
 
 	constructor({ x, y, fill, collidesWithMarble }) {
@@ -8,12 +9,16 @@ class Launcher {
 		this.ang = 0;
 		this.fill = fill || "black";
 		this.acc = 0;
+		this.accDir = 0;
 		this.marble = null;
 		this.collidesWithMarble = collidesWithMarble;
 		this.updated = true;
 	}
 
 	accelerate() {
+		if (this.acc < maxAcc && this.acc > -maxAcc) {
+			this.acc += 0.0005 * this.accDir;
+		}
 		this.ang += this.acc;
 		this.updated = true;
 		if (this.marble) {
@@ -22,6 +27,13 @@ class Launcher {
 	}
 
 	draw(ctx, scale) {
+		ctx.beginPath();
+		ctx.strokeStyle = "rgba(255, 128, 128, 0.9)";
+		ctx.moveTo(this._x * scale, this._y * scale);
+		ctx.lineTo((this._x * scale) + Math.cos(this.ang - (90 * (Math.PI / 180))) * VIRT_WIDTH,
+			(this._y * scale) + Math.sin(this.ang - (90 * (Math.PI / 180))) * VIRT_WIDTH)
+		ctx.stroke();
+
 		ctx.save();
 		ctx.translate(this._x * scale, this._y * scale);
 		ctx.rotate(this.ang);
@@ -40,6 +52,8 @@ class Launcher {
 		ctx.lineTo(0, -50 * scale);
 		ctx.fill();
 		ctx.restore();
+
+
 		this.updated = false;
 		this.clearX = this._x;
 		this.clearY = this._y;
@@ -47,10 +61,7 @@ class Launcher {
 
 	clear(ctx, scale) {
 		ctx.clearRect(
-			this.clearX * scale - 50 * scale,
-			this.clearY * scale - 50 * scale,
-			100 * scale,
-			100 * scale,
+			0, 0, VIRT_WIDTH * scale, VIRT_WIDTH * scale
 		);
 	}
 }

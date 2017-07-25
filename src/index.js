@@ -115,9 +115,14 @@ const launchMarble = (lIdx) => {
 }
 
 window.addEventListener("gamepad-l-axis-x-change", ({detail: {force, controllerIndex}}) => {
-	getLauncher(controllerIndex).acc =
-		Math.abs(force) === 100 ?
-			force * 0.0001 : 0;
+	if (force === -100) {
+		getLauncher(controllerIndex).accDir = -1;
+	} else if (force === 100) {
+		getLauncher(controllerIndex).accDir = 1;
+	} else {
+		getLauncher(controllerIndex).acc = 0;
+		getLauncher(controllerIndex).accDir = 0;
+	}
 });
 
 window.addEventListener("gamepad-a-pressed", ({detail: { controllerIndex }}) => {
@@ -148,7 +153,7 @@ const addRows = (rows) => {
 
 addRows(5);
 
-//window.setInterval(() => addRows(2), 20000);
+window.setInterval(() => addRows(2), 60000);
 
 
 const reinitLaunchers = (controllerIndices) => {
