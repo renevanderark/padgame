@@ -5,7 +5,7 @@ import VIRT_WIDTH from "./virt-width";
 
 class Marble {
 
-	constructor({ x, y, angle, color, radius, detectFall,
+	constructor({ x, y, snapped, angle, color, radius, detectFall,
 		getNeighbours, collidesWithMarble, clearScreen }) {
 		this._id = uuid();
 		this._x = x;
@@ -22,16 +22,17 @@ class Marble {
 		this.markedForRemoval = false;
 		this.readyToBeRemoved = false;
 		this.falling = false;
+		this.snapped = snapped || false;
 	}
 
 	accelerate() {
 		if (this.snapped) { return; }
 		if (this.falling) {
-			this.acc += 0.01;
 			if (this._y > VIRT_WIDTH - this.radius * 2) {
-				this.markedForRemoval = true;
-				this.readyToBeRemoved = true;
-				this.clearScreen();
+				this.markForRemoval(0);
+				this._y = VIRT_WIDTH + this.radius;
+			} else {
+				this.acc += 0.01;
 			}
 		}
 
@@ -69,6 +70,7 @@ class Marble {
 		this.updated = true;
 		this.falling = true;
 		this.snapped = false;
+		this.acc = 12;
 		this.ang = 90 * (Math.PI / 180);
 	}
 
@@ -105,7 +107,6 @@ class Marble {
 	finalizeSnap() {
 		this.snapped = true;
 		this.markNeighbours();
-		this.detectFall();
 		this.clearScreen();
 	}
 
@@ -118,14 +119,14 @@ class Marble {
 		}
 	}
 
-	markForRemoval() {
+	markForRemoval(timeout = 150) {
 		this.markedForRemoval = true;
 		this.color = colors.WHITE;
 		this.updated = true;
 		setTimeout(() => {
 			this.readyToBeRemoved = true;
 			setTimeout(this.clearScreen, 50);
-		}, 100);
+		}, timeout);
 	}
 
 	draw(ctx, scale) {

@@ -38,12 +38,12 @@ const getNeighbours = (getMarbles) => {
     return marked;
   }
 
-  const detectFall = () => {
+  const detectFall = (clearScreen) => {
     let snappedToTop = [];
     for (let i = 0; i < VIRT_WIDTH; i += marbleRadius * 2) {
       snappedToTop = snappedToTop.concat(
         getMarbles().filter(m =>
-          m.snapped && !m.markedForRemoval && !m.readyToBeRemoved &&
+          m.snapped && !(m.markedForRemoval || m.readyToBeRemoved) &&
           isLocatedAround(m, {
             x: i + marbleRadius,
             y: marbleRadius
@@ -55,10 +55,14 @@ const getNeighbours = (getMarbles) => {
       .reduce((a, b) => a.concat(b), [])
       .map(m => m._id);
 
-    getMarbles().filter(m =>
-      m.snapped && !m.markedForRemoval && !m.readyToBeRemoved &&
+    const toFall = getMarbles().filter(m =>
+      m.snapped && !(m.markedForRemoval || m.readyToBeRemoved) &&
       neighboursOfTop.indexOf(m._id) < 0
-    ).forEach(m => m.startFalling())
+    );
+    if (toFall.length > 0) {
+      toFall.forEach(m => m.startFalling());
+      clearScreen();
+    }
   }
 
   return {

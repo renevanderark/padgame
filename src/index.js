@@ -23,6 +23,8 @@ const snapLayerCtx = snapLayer.getContext("2d");
 const ballFrameRenderer = getFrameRenderer(ballLayerCtx, VIRT_WIDTH);
 const snapFrameRenderer = getFrameRenderer(snapLayerCtx, VIRT_WIDTH);
 const colliders = getColliders(getMarbles);
+const getNeighboursImpl = getNeighbours(getMarbles);
+
 
 function getBallLayerDrawables() {
 	return getMarbles().filter(m => !m.snapped)
@@ -61,6 +63,9 @@ const renderLoop = () => {
 };
 
 renderLoop();
+
+window.setInterval(() =>
+	getNeighboursImpl.detectFall(forceRedraw), 200);
 
 window.setInterval(
   () => {
@@ -102,13 +107,12 @@ const reinitLaunchers = (controllerIndices) => {
 	}
 }
 
-const getNeighboursImpl = getNeighbours(getMarbles);
 const reloadLaucher = (lIdx) => {
 	const l = getLauncher(lIdx);
 	if (!l.marble) {
 		l.marble = new Marble({
 			x: l._x, y: l._y,
-			color: parseInt(Math.random() * 2) + 1,
+			color: parseInt(Math.random() * 3) + 1,
 			radius: 30, angle: l.ang - (90 * (Math.PI / 180)),
 			collidesWithMarble: colliders.marbleCollidesWithMarble,
 			getNeighbours: getNeighboursImpl.getNeighbours,
@@ -137,7 +141,27 @@ window.addEventListener("gamepad-l-axis-x-change", ({detail: {force, controllerI
 
 window.addEventListener("gamepad-a-pressed", ({detail: { controllerIndex }}) => {
 	launchMarble(controllerIndex);
-})
+});
+
+const marbleRadius = 30;
+const baseMarbleOpts = {
+	radius: marbleRadius,
+	angle: 90 * (Math.PI / 180),
+	snapped: true,
+	collidesWithMarble: colliders.marbleCollidesWithMarble,
+	getNeighbours: getNeighboursImpl.getNeighbours,
+	detectFall: getNeighboursImpl.detectFall,
+	clearScreen: forceRedraw
+};
+
+for (let i = 0; i < VIRT_WIDTH; i += marbleRadius * 2) {
+	addMarble(new Marble({
+		...baseMarbleOpts,
+		x: i + marbleRadius,
+		y: marbleRadius,
+		color: parseInt(Math.random() * 3) + 1,
+	}));
+}
 /*
 window.addEventListener("keydown", (ev) => {
 	reinitLaunchers(["1"]);
