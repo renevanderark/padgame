@@ -24,6 +24,7 @@ const launcherLayerCtx = launcherLayer.getContext("2d");
 const textLayer = document.getElementById("text-layer");
 const textLayerCtx = textLayer.getContext("2d");
 const pointBar = document.getElementById("point-bar");
+const pointBarVert = document.getElementById("point-bar-vert");
 
 const ballFrameRenderer = getFrameRenderer(ballLayerCtx, VIRT_WIDTH);
 const snapFrameRenderer = getFrameRenderer(snapLayerCtx, VIRT_WIDTH);
@@ -67,12 +68,14 @@ initViewPort(getResizeListeners([ballLayer, snapLayer, launcherLayer, textLayer]
 	forceRedraw,
 	(w, h) => {
 		if (w > h) {
-			pointBar.style.width = `${w - h - 10}px`;
-			pointBar.style.left = `${h + 20}px`;
-			pointBar.style.top = "10px";
+			pointBar.style.display = "none";
+			pointBarVert.style.display = "block";
+			pointBarVert.style.height = `${h - 10}px`;
+			pointBarVert.style.left = `${h + 20}px`;
 		} else {
+			pointBar.style.display = "block";
+			pointBarVert.style.display = "none";
 			pointBar.style.width = `${w}px`;
-			pointBar.style.left = "10px";
 			pointBar.style.top = `${w + 20}px`;
 		}
 	}
@@ -98,7 +101,7 @@ window.setInterval(
 		removeReadyMarbles();
 		getLaunchers().forEach(l => {
 			l.accelerate();
-		})
+		});
 		getMarbles().forEach(m => {
 			m.accelerate();
 			if (m.snapped && !m.readyToBeRemoved && !m.markedForRemoval &&  m._y > VIRT_WIDTH - m.radius * 2) {
@@ -193,6 +196,7 @@ let levelPoints = 0;
 const setLevelPoints = (amt) => {
 	if (levelPoints > levelTarget) {
 		pointBar.querySelector("div").style.width = "100%";
+		pointBarVert.querySelector("div").style.height = "100%"
 		levelTarget += 500;
 
 		textFrameRenderer
@@ -200,6 +204,8 @@ const setLevelPoints = (amt) => {
 		setTimeout(() => startLevel(level + 1), 1250);
 	} else {
 		pointBar.querySelector("div").style.width =
+			`${(amt / levelTarget) * 100}%`;
+		pointBarVert.querySelector("div").style.height =
 			`${(amt / levelTarget) * 100}%`;
 		levelPoints = amt;
 	}
