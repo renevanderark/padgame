@@ -240,6 +240,10 @@ function gameOver() {
 		window.clearInterval(addRowInterval);
 	}
 
+	window.removeEventListener("gamepad-l-axis-x-change", onAxis);
+	window.removeEventListener("gamepad-a-pressed", onAPressed);
+
+
 	clearWelcome = textFrameRenderer.drawText("Game over! Press start", {
 		x: 150,
 		y: 500,
@@ -248,26 +252,29 @@ function gameOver() {
 	window.addEventListener("gamepad-start-pressed", startGame);
 }
 
+function onAxis({detail: {force, controllerIndex}}) {
+	if (force === -100) {
+		getLauncher(controllerIndex).accDir = -1;
+	} else if (force === 100) {
+		getLauncher(controllerIndex).accDir = 1;
+	} else {
+		getLauncher(controllerIndex).acc = 0;
+		getLauncher(controllerIndex).accDir = 0;
+	}
+}
+
+function onAPressed({detail: { controllerIndex }}) {
+	launchMarble(controllerIndex);
+}
+
 function startGame() {
 	clearMarbles();
 	forceRedraw();
 	clearWelcome();
 	textLayer.style.backgroundColor = "rgba(0,0,0,0)";
 	window.removeEventListener("gamepad-start-pressed", startGame);
-	window.addEventListener("gamepad-l-axis-x-change", ({detail: {force, controllerIndex}}) => {
-		if (force === -100) {
-			getLauncher(controllerIndex).accDir = -1;
-		} else if (force === 100) {
-			getLauncher(controllerIndex).accDir = 1;
-		} else {
-			getLauncher(controllerIndex).acc = 0;
-			getLauncher(controllerIndex).accDir = 0;
-		}
-	});
-
-	window.addEventListener("gamepad-a-pressed", ({detail: { controllerIndex }}) => {
-		launchMarble(controllerIndex);
-	});
+	window.addEventListener("gamepad-l-axis-x-change", onAxis);
+	window.addEventListener("gamepad-a-pressed", onAPressed);
 
 	startLevel(1);
 }
