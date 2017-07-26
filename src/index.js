@@ -23,6 +23,7 @@ const launcherLayer = document.getElementById("launcher-layer");
 const launcherLayerCtx = launcherLayer.getContext("2d");
 const textLayer = document.getElementById("text-layer");
 const textLayerCtx = textLayer.getContext("2d");
+const infoDiv = document.getElementById("info");
 const pointBar = document.getElementById("point-bar");
 const pointBarVert = document.getElementById("point-bar-vert");
 
@@ -70,13 +71,21 @@ initViewPort(getResizeListeners([ballLayer, snapLayer, launcherLayer, textLayer]
 		if (w > h) {
 			pointBar.style.display = "none";
 			pointBarVert.style.display = "block";
-			pointBarVert.style.height = `${h - 10}px`;
+			pointBarVert.style.height = `${h}px`;
 			pointBarVert.style.left = `${h + 20}px`;
+			infoDiv.style.left = `${h + 50}px`;
+			infoDiv.style.top = "10px";
+			infoDiv.style.width = `${w - h - 40}px`;
+			infoDiv.style.height = `${h / 2}px`;
 		} else {
 			pointBar.style.display = "block";
 			pointBarVert.style.display = "none";
 			pointBar.style.width = `${w}px`;
 			pointBar.style.top = `${w + 20}px`;
+			infoDiv.style.top = `${w + 50}px`;
+			infoDiv.style.width = `${w}px`;
+			infoDiv.style.left = `10px`;
+			infoDiv.style.height = `${h - w - 40}px`;
 		}
 	}
 ));
@@ -189,19 +198,23 @@ const reinitLaunchers = (controllerIndices) => {
 }
 
 let addRowInterval = null;
-let levelTarget = 500;
+let levelTarget = 0;
 let level = 0;
 let levelPoints = 0;
+let gamePoints = 0;
+
+function finishLevel() {
+	pointBar.querySelector("div").style.width = "100%";
+	pointBarVert.querySelector("div").style.height = "100%";
+	levelPoints = 0;
+	textFrameRenderer
+		.drawText("Well done!", {x: 360, y: 500, fill: "white", timeout: 1250});
+	setTimeout(() => startLevel(level + 1), 1250);
+}
 
 const setLevelPoints = (amt) => {
-	if (levelPoints > levelTarget) {
-		pointBar.querySelector("div").style.width = "100%";
-		pointBarVert.querySelector("div").style.height = "100%"
-		levelTarget += 500;
-
-		textFrameRenderer
-			.drawText("Well done!", {x: 360, y: 500, fill: "white", timeout: 1250});
-		setTimeout(() => startLevel(level + 1), 1250);
+	if (levelPoints >= levelTarget) {
+		finishLevel();
 	} else {
 		pointBar.querySelector("div").style.width =
 			`${(amt / levelTarget) * 100}%`;
@@ -211,14 +224,23 @@ const setLevelPoints = (amt) => {
 	}
 }
 
+const setGamePoints = (amt) => {
+	gamePoints = amt;
+	document.getElementById("points").innerHTML = gamePoints;
+}
+
 function addLevelPoints(amt) {
 	setLevelPoints(levelPoints + amt);
+	setGamePoints(gamePoints + amt);
 }
 
 const startLevel = (lvl) => {
+	document.getElementById("level").innerHTML = `Level ${lvl}`;
 	level = lvl;
+	levelTarget += 50;
 	clearMarbles();
 	setLevelPoints(0);
+	forceRedraw();
 	if (addRowInterval !== null) {
 		window.clearInterval(addRowInterval);
 	}
@@ -238,9 +260,7 @@ let clearWelcome = textFrameRenderer.drawText("Press start", {
 });
 
 function gameOver() {
-	level = 0;
-	levelPoints = 0;
-	textLayer.style.backgroundColor = "#6666";
+	textLayer.style.backgroundColor = "#6669";
 
 	if (addRowInterval !== null) {
 		window.clearInterval(addRowInterval);
@@ -274,6 +294,11 @@ function onAPressed({detail: { controllerIndex }}) {
 }
 
 function startGame() {
+	level = 0;
+	levelTarget = 250;
+	setLevelPoints(0);
+	setGamePoints(0);
+
 	clearMarbles();
 	forceRedraw();
 	clearWelcome();
