@@ -25,7 +25,7 @@ export default (ctx, vWidth) => {
 		},
 		drawText: (txt, {x = 50, y = 50, timeout = null, fill = null, font = null, shade = false, shadeDistance = null}) => {
 			const _x = parseInt(Math.ceil(x * scale), 10);
-			const _y = parseInt(Math.ceil(y * scale), 10)
+			const _y = parseInt(Math.ceil(y * scale), 10);
 			ctx.font = font || `bold ${50 * scale}px sans-serif`;
 			if (shade) {
 				ctx.fillStyle = shade;

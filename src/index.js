@@ -31,7 +31,7 @@ const launcherFrameRenderer = getFrameRenderer(launcherLayerCtx, VIRT_WIDTH);
 const textFrameRenderer = getFrameRenderer(textLayerCtx, VIRT_WIDTH);
 
 const colliders = getColliders(getMarbles);
-const getNeighboursImpl = getNeighbours(getMarbles);
+const getNeighboursImpl = getNeighbours(getMarbles, addLevelPoints);
 
 function getBallLayerDrawables() {
 	return getMarbles().filter(m => !m.snapped)
@@ -99,7 +99,12 @@ window.setInterval(
 		getLaunchers().forEach(l => {
 			l.accelerate();
 		})
-		getMarbles().forEach(m => m.accelerate());
+		getMarbles().forEach(m => {
+			m.accelerate();
+			if (m.snapped && !m.readyToBeRemoved && !m.markedForRemoval &&  m._y > VIRT_WIDTH - m.radius * 2) {
+				gameOver();
+			}
+		});
 	},
   10
 );
@@ -114,7 +119,8 @@ const reloadLaucher = (lIdx) => {
 			collidesWithMarble: colliders.marbleCollidesWithMarble,
 			getNeighbours: getNeighboursImpl.getNeighbours,
 			detectFall: getNeighboursImpl.detectFall,
-			clearScreen: forceRedraw
+			clearScreen: forceRedraw,
+			addPoints: addLevelPoints
 		});
 	}
 }
@@ -136,8 +142,10 @@ const baseMarbleOpts = {
 	collidesWithMarble: colliders.marbleCollidesWithMarble,
 	getNeighbours: getNeighboursImpl.getNeighbours,
 	detectFall: getNeighboursImpl.detectFall,
+	addPoints: addLevelPoints,
 	clearScreen: forceRedraw
 };
+
 const addRows = (rows) => {
 	for (let row = 0; row < rows; row++) {
 		getMarbles().filter(m => m.snapped)
@@ -178,7 +186,33 @@ const reinitLaunchers = (controllerIndices) => {
 }
 
 let addRowInterval = null;
+let levelTarget = 500;
+let level = 0;
+let levelPoints = 0;
+
+const setLevelPoints = (amt) => {
+	if (levelPoints > levelTarget) {
+		pointBar.querySelector("div").style.width = "100%";
+		levelTarget += 500;
+
+		textFrameRenderer
+			.drawText("Well done!", {x: 360, y: 500, fill: "white", timeout: 1250});
+		setTimeout(() => startLevel(level + 1), 1250);
+	} else {
+		pointBar.querySelector("div").style.width =
+			`${(amt / levelTarget) * 100}%`;
+		levelPoints = amt;
+	}
+}
+
+function addLevelPoints(amt) {
+	setLevelPoints(levelPoints + amt);
+}
+
 const startLevel = (lvl) => {
+	level = lvl;
+	clearMarbles();
+	setLevelPoints(0);
 	if (addRowInterval !== null) {
 		window.clearInterval(addRowInterval);
 	}
@@ -191,14 +225,32 @@ const startLevel = (lvl) => {
 		.setInterval(() => addRows(2), lvl < 25 ? 30000 - (lvl * 1000) : 5000);
 };
 
-const clearWelcome = textFrameRenderer.drawText("Press start", {
+let clearWelcome = textFrameRenderer.drawText("Press start", {
 	x: 350,
 	y: 500,
 	fill: "white"
 });
 
+function gameOver() {
+	level = 0;
+	levelPoints = 0;
+	textLayer.style.backgroundColor = "#6666";
+
+	if (addRowInterval !== null) {
+		window.clearInterval(addRowInterval);
+	}
+
+	clearWelcome = textFrameRenderer.drawText("Game over! Press start", {
+		x: 150,
+		y: 500,
+		fill: "white"
+	});
+	window.addEventListener("gamepad-start-pressed", startGame);
+}
 
 function startGame() {
+	clearMarbles();
+	forceRedraw();
 	clearWelcome();
 	textLayer.style.backgroundColor = "rgba(0,0,0,0)";
 	window.removeEventListener("gamepad-start-pressed", startGame);
@@ -221,6 +273,5 @@ function startGame() {
 }
 
 window.addEventListener("gamepad-start-pressed", startGame);
-
 
 initPadEvents({ onControllersChange: reinitLaunchers});

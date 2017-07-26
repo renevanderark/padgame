@@ -9,7 +9,7 @@ const getNeighbourCoordinates = (marble) =>
       y: Math.round(marble._y + Math.sin(rad) * (marble.radius * 2))
     }));
 
-const getNeighbours = (getMarbles) => {
+const getNeighbours = (getMarbles, addPoints) => {
 
   const isLocatedAround = (m, nC) =>
     m._x > nC.x - m.radius &&
@@ -71,7 +71,10 @@ const getNeighbours = (getMarbles) => {
 
     snappedFound.filter(m =>
       neighboursOfTopIds.indexOf(m._id) < 0
-    ).forEach(m => m.startFalling());
+    ).forEach(m => {
+      m.startFalling();
+      addPoints(20);
+    });
 
   }
 

@@ -6,7 +6,7 @@ import VIRT_WIDTH from "./virt-width";
 class Marble {
 
 	constructor({ x, y, snapped, angle, color, radius, detectFall,
-		getNeighbours, collidesWithMarble, clearScreen }) {
+		getNeighbours, collidesWithMarble, clearScreen, addPoints }) {
 		this._id = uuid();
 		this._x = x;
 		this._y = y;
@@ -19,6 +19,7 @@ class Marble {
 		this.detectFall = detectFall;
 		this.updated = true;
 		this.clearScreen = clearScreen;
+		this.addPoints = addPoints;
 		this.markedForRemoval = false;
 		this.readyToBeRemoved = false;
 		this.falling = false;
@@ -127,7 +128,8 @@ class Marble {
 		if (nSameColor.length > 2) {
 			nSameColor.forEach(m => {
 				m.markForRemoval()
-			})
+			});
+			this.addPoints(nSameColor.length * 5)
 			setTimeout(() => {
 				this.detectFall();
 			}, 150);
