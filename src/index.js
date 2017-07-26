@@ -23,6 +23,7 @@ const launcherLayer = document.getElementById("launcher-layer");
 const launcherLayerCtx = launcherLayer.getContext("2d");
 const textLayer = document.getElementById("text-layer");
 const textLayerCtx = textLayer.getContext("2d");
+const pointBar = document.getElementById("point-bar");
 
 const ballFrameRenderer = getFrameRenderer(ballLayerCtx, VIRT_WIDTH);
 const snapFrameRenderer = getFrameRenderer(snapLayerCtx, VIRT_WIDTH);
@@ -63,7 +64,18 @@ initViewPort(getResizeListeners([ballLayer, snapLayer, launcherLayer, textLayer]
 	snapFrameRenderer.onResize,
 	launcherFrameRenderer.onResize,
 	textFrameRenderer.onResize,
-	forceRedraw
+	forceRedraw,
+	(w, h) => {
+		if (w > h) {
+			pointBar.style.width = `${w - h - 10}px`;
+			pointBar.style.left = `${h + 20}px`;
+			pointBar.style.top = "10px";
+		} else {
+			pointBar.style.width = `${w}px`;
+			pointBar.style.left = "10px";
+			pointBar.style.top = `${w + 20}px`;
+		}
+	}
 ));
 
 const renderLoop = () => {
