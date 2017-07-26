@@ -1,0 +1,29 @@
+<html>
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+</head>
+<body style="margin: 0; padding: 0; width: 100%; height: 100%; background-color: #666; font-family: sans-serif;">
+<div id="bod" style="height: calc(100% - 10px); width: calc(100% - 10px); padding-top: 10px; padding-left: 10px; background-image: url(tex.png); ">
+<canvas id="launcher-layer" style="position: absolute; background-image: url(bg.jpg); box-shadow: inset 8px 8px 2px -4px rgba(128,128,128,0.5)"></canvas>
+<canvas id="snap-layer" style="position: absolute"></canvas>
+<canvas id="ball-layer" style="position: absolute;"></canvas>
+<canvas id="text-layer" style="position: absolute; background-color: #6669"></canvas>
+
+<div id="point-bar" style="position: absolute; border-radius: 4px; background-color: #ddd; height: 20px; width: 150px; box-shadow: inset 8px 8px 2px -4px rgba(128,128,128,0.5)">
+  <div style="width: 0%; height: 100%; background-color: rgba(0,255,0,0.4) ">
+  </div>
+</div>
+<div id="point-bar-vert" style="position: absolute; border-radius: 4px; background-color: #ddd;  width: 20px; height: 150px; box-shadow: inset -8px -8px 2px -4px rgba(128,128,128,0.5); transform: rotate(180deg) ">
+  <div style="width:  100%; height: 0%; background-color: rgba(0,255,0,0.4) ">
+  </div>
+</div>
+<div id="info" style="position: absolute; box-shadow: inset 8px 8px 2px -4px rgba(128,128,128,0.5); background-color: #333">
+<div id="level" style="font-weight: bold; color: white; padding: 20px"></div>
+<div id="points" style="color: #3f3; padding-left: 20px; font-weight: bold"></div>
+<div id="new-row-timer" style="color: #f33; padding-left: 20px; padding-top: 20px; font-weight: bold"></div>
+</div>
+</div>
+<script src="./build/index.js"></script>
+</body>
+</html>
