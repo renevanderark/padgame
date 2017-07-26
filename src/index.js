@@ -20,11 +20,15 @@ const ballLayerCtx = ballLayer.getContext('2d');
 const snapLayer = document.getElementById("snap-layer");
 const snapLayerCtx = snapLayer.getContext("2d");
 const launcherLayer = document.getElementById("launcher-layer");
-const launcherLayerCtx = launcherLayer.getContext("2d")
+const launcherLayerCtx = launcherLayer.getContext("2d");
+const textLayer = document.getElementById("text-layer");
+const textLayerCtx = textLayer.getContext("2d");
 
 const ballFrameRenderer = getFrameRenderer(ballLayerCtx, VIRT_WIDTH);
 const snapFrameRenderer = getFrameRenderer(snapLayerCtx, VIRT_WIDTH);
 const launcherFrameRenderer = getFrameRenderer(launcherLayerCtx, VIRT_WIDTH);
+const textFrameRenderer = getFrameRenderer(textLayerCtx, VIRT_WIDTH);
+
 const colliders = getColliders(getMarbles);
 const getNeighboursImpl = getNeighbours(getMarbles);
 
@@ -54,10 +58,11 @@ const forceRedraw = () => {
 	getDrawables().forEach(d => d.updated = true);
 };
 
-initViewPort(getResizeListeners([ballLayer, snapLayer, launcherLayer],
+initViewPort(getResizeListeners([ballLayer, snapLayer, launcherLayer, textLayer],
 	ballFrameRenderer.onResize,
 	snapFrameRenderer.onResize,
 	launcherFrameRenderer.onResize,
+	textFrameRenderer.onResize,
 	forceRedraw
 ));
 
@@ -76,7 +81,6 @@ const renderLoop = () => {
 
 renderLoop();
 
-
 window.setInterval(
   () => {
 		removeReadyMarbles();
@@ -87,7 +91,6 @@ window.setInterval(
 	},
   10
 );
-
 
 const reloadLaucher = (lIdx) => {
 	const l = getLauncher(lIdx);
@@ -167,15 +170,26 @@ const startLevel = (lvl) => {
 	if (addRowInterval !== null) {
 		window.clearInterval(addRowInterval);
 	}
+
+	textFrameRenderer
+		.drawText(`Level ${lvl}!`, {x: 360, y: 500, fill: "white", timeout: 1250});
+
 	addRows(5);
 	addRowInterval = window
 		.setInterval(() => addRows(2), lvl < 25 ? 30000 - (lvl * 1000) : 5000);
 };
 
-window.addEventListener("gamepad-start-pressed", startGame);
-function startGame() {
-	window.removeEventListener("gamepad-start-pressed", startGame);
+const clearWelcome = textFrameRenderer.drawText("Press start", {
+	x: 350,
+	y: 500,
+	fill: "white"
+});
 
+
+function startGame() {
+	clearWelcome();
+	textLayer.style.backgroundColor = "rgba(0,0,0,0)";
+	window.removeEventListener("gamepad-start-pressed", startGame);
 	window.addEventListener("gamepad-l-axis-x-change", ({detail: {force, controllerIndex}}) => {
 		if (force === -100) {
 			getLauncher(controllerIndex).accDir = -1;
@@ -194,6 +208,7 @@ function startGame() {
 	startLevel(1);
 }
 
+window.addEventListener("gamepad-start-pressed", startGame);
 
 
 initPadEvents({ onControllersChange: reinitLaunchers});
