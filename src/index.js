@@ -113,22 +113,6 @@ const launchMarble = (lIdx) => {
 	}
 }
 
-window.addEventListener("gamepad-l-axis-x-change", ({detail: {force, controllerIndex}}) => {
-	if (force === -100) {
-		getLauncher(controllerIndex).accDir = -1;
-	} else if (force === 100) {
-		getLauncher(controllerIndex).accDir = 1;
-	} else {
-		getLauncher(controllerIndex).acc = 0;
-		getLauncher(controllerIndex).accDir = 0;
-	}
-});
-
-window.addEventListener("gamepad-a-pressed", ({detail: { controllerIndex }}) => {
-	launchMarble(controllerIndex);
-});
-
-
 const marbleRadius = 30;
 const baseMarbleOpts = {
 	radius: marbleRadius,
@@ -148,14 +132,9 @@ const addRows = (rows) => {
 		}
 	}
 	getNeighboursImpl.detectFall();
-}
-
-addRows(5);
-
-window.setInterval(() => addRows(2), 30000);
+};
 
 const reinitLaunchers = (controllerIndices) => {
-
 	controllerIndices
 		.filter((c,idx) => idx < 2)
 		.forEach(idx => {
@@ -182,5 +161,39 @@ const reinitLaunchers = (controllerIndices) => {
 		}
 	}
 }
+
+let addRowInterval = null;
+const startLevel = (lvl) => {
+	if (addRowInterval !== null) {
+		window.clearInterval(addRowInterval);
+	}
+	addRows(5);
+	addRowInterval = window
+		.setInterval(() => addRows(2), lvl < 25 ? 30000 - (lvl * 1000) : 5000);
+};
+
+window.addEventListener("gamepad-start-pressed", startGame);
+function startGame() {
+	window.removeEventListener("gamepad-start-pressed", startGame);
+
+	window.addEventListener("gamepad-l-axis-x-change", ({detail: {force, controllerIndex}}) => {
+		if (force === -100) {
+			getLauncher(controllerIndex).accDir = -1;
+		} else if (force === 100) {
+			getLauncher(controllerIndex).accDir = 1;
+		} else {
+			getLauncher(controllerIndex).acc = 0;
+			getLauncher(controllerIndex).accDir = 0;
+		}
+	});
+
+	window.addEventListener("gamepad-a-pressed", ({detail: { controllerIndex }}) => {
+		launchMarble(controllerIndex);
+	});
+
+	startLevel(1);
+}
+
+
 
 initPadEvents({ onControllersChange: reinitLaunchers});
