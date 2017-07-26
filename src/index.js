@@ -77,6 +77,7 @@ initViewPort(getResizeListeners([ballLayer, snapLayer, launcherLayer, textLayer]
 			infoDiv.style.top = "10px";
 			infoDiv.style.width = `${w - h - 40}px`;
 			infoDiv.style.height = `${h / 2}px`;
+			infoDiv.style.fontSize = `${h / 15}px`;
 		} else {
 			pointBar.style.display = "block";
 			pointBarVert.style.display = "none";
@@ -86,6 +87,7 @@ initViewPort(getResizeListeners([ballLayer, snapLayer, launcherLayer, textLayer]
 			infoDiv.style.width = `${w}px`;
 			infoDiv.style.left = `10px`;
 			infoDiv.style.height = `${h - w - 40}px`;
+			infoDiv.style.fontSize = `${w / 15}px`;
 		}
 	}
 ));
@@ -121,12 +123,17 @@ window.setInterval(
   10
 );
 
+function getColorCount() {
+	return level < 5
+		? 3 : (level < 10 ? 4 : 5);
+}
+
 const reloadLaucher = (lIdx) => {
 	const l = getLauncher(lIdx);
 	if (!l.marble) {
 		l.marble = new Marble({
 			x: l._x, y: l._y,
-			color: parseInt(Math.random() * 3) + 1,
+			color: parseInt(Math.random() * getColorCount()) + 1,
 			radius: 30, angle: l.ang - (90 * (Math.PI / 180)),
 			collidesWithMarble: colliders.marbleCollidesWithMarble,
 			getNeighbours: getNeighboursImpl.getNeighbours,
@@ -163,7 +170,9 @@ const addRows = (rows) => {
 		getMarbles().filter(m => m.snapped)
 			.forEach(m => m.descend())
 		for (let i = 0; i < VIRT_WIDTH; i += marbleRadius * 2) {
-			addMarble(new Marble({...baseMarbleOpts, x: i + marbleRadius, y: marbleRadius, color: parseInt(Math.random() * 3) + 1}));
+			addMarble(new Marble({...baseMarbleOpts,
+				 x: i + marbleRadius, y: marbleRadius,
+				 color: parseInt(Math.random() * getColorCount()) + 1}));
 		}
 	}
 	getNeighboursImpl.detectFall();
@@ -202,6 +211,7 @@ let levelTarget = 0;
 let level = 0;
 let levelPoints = 0;
 let gamePoints = 0;
+let newRowTimer = 0;
 
 function finishLevel() {
 	pointBar.querySelector("div").style.width = "100%";
@@ -234,11 +244,24 @@ function addLevelPoints(amt) {
 	setGamePoints(gamePoints + amt);
 }
 
+function resetNewRowTimer() {
+	newRowTimer = level < 25 ? 31 - Math.floor(level / 2) : 10;
+}
+
+window.setInterval(() => {
+	newRowTimer = newRowTimer <= 0 ? 0 : newRowTimer - 1;
+	if (newRowTimer <= 10 && newRowTimer > 0) {
+		document.getElementById("new-row-timer").innerHTML = `${newRowTimer}`
+	} else {
+		document.getElementById("new-row-timer").innerHTML = "";
+	}
+}, 1000);
+
 const startLevel = (lvl) => {
 	document.getElementById("level").innerHTML = `Level ${lvl}`;
 	level = lvl;
-	levelTarget += 50;
-	clearMarbles();
+	levelTarget += 25;
+	if (level === 1) { clearMarbles(); }
 	setLevelPoints(0);
 	forceRedraw();
 	if (addRowInterval !== null) {
@@ -248,9 +271,20 @@ const startLevel = (lvl) => {
 	textFrameRenderer
 		.drawText(`Level ${lvl}!`, {x: 360, y: 500, fill: "white", timeout: 1250});
 
-	addRows(5);
+	if (level === 1) {
+		addRows(5);
+	} else {
+		addRows(1);
+	}
+	resetNewRowTimer();
 	addRowInterval = window
-		.setInterval(() => addRows(2), lvl < 25 ? 30000 - (lvl * 1000) : 5000);
+		.setInterval(() =>  {
+			addRows(2);
+			resetNewRowTimer();
+
+		}, (level < 25 ? 31 - Math.floor(level / 2) : 10) * 1000
+	);
+
 };
 
 let clearWelcome = textFrameRenderer.drawText("Press start", {
