@@ -474,10 +474,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	function startGame() {
-		mus1.play();
-		plock.play();
-		crack.play();
-		crack2.play();
 		level = 0;
 		levelTarget = 250;
 		setLevelPoints(0);
@@ -499,6 +495,7 @@ return /******/ (function(modules) { // webpackBootstrap
 		window.addEventListener("touchend", onClick);
 		eventListeners.add("mousemove", onMouseMove);
 		eventListeners.add("touchmove", onTouchMove);
+		eventListeners.add("touchstart", onTouchMove);
 		reinitLaunchers(["0"]);
 		startLevel(1);
 	}
