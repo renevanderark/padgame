@@ -307,8 +307,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	var newRowTimer = 0;
 
 	function finishLevel() {
-		pointBar.querySelector("div").style.width = "100%";
-		pointBarVert.querySelector("div").style.height = "100%";
+		pointBar.querySelector("div").style.width = "98%";
+		pointBarVert.querySelector("div").style.height = "98%";
 		levelPoints = 0;
 		textFrameRenderer.drawText("Well done!", { x: 360, y: 500, fill: "white", timeout: 1250 });
 		setTimeout(function () {
@@ -320,8 +320,8 @@ return /******/ (function(modules) { // webpackBootstrap
 		if (levelPoints >= levelTarget) {
 			finishLevel();
 		} else {
-			pointBar.querySelector("div").style.width = amt / levelTarget * 98 + "%";
-			pointBarVert.querySelector("div").style.height = amt / levelTarget * 98 + "%";
+			pointBar.querySelector("div").style.width = parseInt(amt / levelTarget * 98) + "%";
+			pointBarVert.querySelector("div").style.height = parseInt(amt / levelTarget * 98) + "%";
 			levelPoints = amt;
 		}
 	};
