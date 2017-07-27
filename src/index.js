@@ -222,8 +222,8 @@ let gamePoints = 0;
 let newRowTimer = 0;
 
 function finishLevel() {
-	pointBar.querySelector("div").style.width = "100%";
-	pointBarVert.querySelector("div").style.height = "100%";
+	pointBar.querySelector("div").style.width = "98%";
+	pointBarVert.querySelector("div").style.height = "98%";
 	levelPoints = 0;
 	textFrameRenderer
 		.drawText("Well done!", {x: 360, y: 500, fill: "white", timeout: 1250});
@@ -235,9 +235,9 @@ const setLevelPoints = (amt) => {
 		finishLevel();
 	} else {
 		pointBar.querySelector("div").style.width =
-			`${(amt / levelTarget) * 98}%`;
+			`${parseInt((amt / levelTarget) * 98)}%`;
 		pointBarVert.querySelector("div").style.height =
-			`${(amt / levelTarget) * 98}%`;
+			`${parseInt((amt / levelTarget) * 98)}%`;
 		levelPoints = amt;
 	}
 }
