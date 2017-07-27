@@ -36,6 +36,9 @@ const colliders = getColliders(getMarbles);
 const getNeighboursImpl = getNeighbours(getMarbles, addLevelPoints);
 const mus1 = new Audio("./mus1.ogg");
 
+window.addEventListener("load", () => setTimeout(() => window.scrollTo(0, 1), 0));
+
+
 function getBallLayerDrawables() {
 	return getMarbles().filter(m => !m.snapped)
 		.concat(getLaunchers().map(l => l.marble)
@@ -295,6 +298,13 @@ let clearWelcome = textFrameRenderer.drawText("Press start", {
 	fill: "white"
 });
 
+const onTouchMove = (name, ev, scale) => {
+	onMouseMove(name, {
+		clientX: ev.touches[0].clientX,
+		clientY: ev.touches[0].clientY
+	}, scale);
+}
+
 const onMouseMove = (name, {clientX, clientY}, scale) => {
 	const lX = getLauncher("0")._x;
 	const lY = getLauncher("0")._y;
@@ -322,6 +332,7 @@ function gameOver() {
 	window.removeEventListener("gamepad-right-pressed", onRightPressed);
 	window.removeEventListener("gamepad-right-released", onArrowReleased);
 	window.removeEventListener("click", onClick);
+	window.removeEventListener("touchend", onClick);
 	eventListeners.clear();
 	clearWelcome = textFrameRenderer.drawText("Game over! Press start", {
 		x: 150,
@@ -330,6 +341,7 @@ function gameOver() {
 	});
 	window.addEventListener("gamepad-start-pressed", startGame);
 	window.addEventListener("click", startGame);
+	window.addEventListener("touchstart", startGame);
 }
 
 function onAxis({detail: {force, controllerIndex}}) {
@@ -375,6 +387,7 @@ function startGame() {
 	textLayer.style.backgroundColor = "rgba(0,0,0,0)";
 	window.removeEventListener("gamepad-start-pressed", startGame);
 	window.removeEventListener("click", startGame);
+	window.removeEventListener("touchstart", startGame);
 	window.addEventListener("gamepad-l-axis-x-change", onAxis);
 	window.addEventListener("gamepad-a-pressed", onAPressed);
 	window.addEventListener("gamepad-left-pressed", onLeftPressed);
@@ -382,7 +395,9 @@ function startGame() {
 	window.addEventListener("gamepad-right-pressed", onRightPressed);
 	window.addEventListener("gamepad-right-released", onArrowReleased);
 	window.addEventListener("click", onClick);
+	window.addEventListener("touchend", onClick);
 	eventListeners.add("mousemove", onMouseMove);
+	eventListeners.add("touchmove", onTouchMove)
 	reinitLaunchers(["0"]);
 	startLevel(1);
 }
@@ -391,4 +406,5 @@ textLayer.style.backgroundColor = "rgba(96,96,96,0.6)";
 
 window.addEventListener("gamepad-start-pressed", startGame);
 window.addEventListener("click", startGame);
+window.addEventListener("touchstart", startGame);
 initPadEvents({ onControllersChange: reinitLaunchers});
