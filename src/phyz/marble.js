@@ -3,6 +3,11 @@ import { fills, strokes, colors } from "./colors";
 import { getNeighbourCoordinates } from "./neighbours";
 import VIRT_WIDTH from "./virt-width";
 
+const crack = new Audio("./crack.ogg");
+const crack2 = new Audio("./crack2.ogg");
+const cracks = [crack, crack2];
+const plock = new Audio("./plock.ogg");
+
 class Marble {
 
 	constructor({ x, y, snapped, angle, color, radius, detectFall,
@@ -126,6 +131,7 @@ class Marble {
 	markNeighbours() {
 		const nSameColor = this.getNeighbours(this, this.color);
 		if (nSameColor.length > 2) {
+			cracks[parseInt(Math.random() * cracks.length)].play();
 			nSameColor.forEach(m => {
 				m.markForRemoval()
 			});
@@ -133,6 +139,8 @@ class Marble {
 			setTimeout(() => {
 				this.detectFall();
 			}, 150);
+		} else {
+			plock.play();
 		}
 	}
 

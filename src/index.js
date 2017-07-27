@@ -34,6 +34,7 @@ const textFrameRenderer = getFrameRenderer(textLayerCtx, VIRT_WIDTH);
 
 const colliders = getColliders(getMarbles);
 const getNeighboursImpl = getNeighbours(getMarbles, addLevelPoints);
+const mus1 = new Audio("./mus1.ogg");
 
 function getBallLayerDrawables() {
 	return getMarbles().filter(m => !m.snapped)
@@ -66,6 +67,7 @@ initViewPort(getResizeListeners([ballLayer, snapLayer, launcherLayer, textLayer]
 	snapFrameRenderer.onResize,
 	launcherFrameRenderer.onResize,
 	textFrameRenderer.onResize,
+	eventListeners.onResize,
 	forceRedraw,
 	(w, h) => {
 		if (w > h) {
@@ -124,8 +126,8 @@ window.setInterval(
 );
 
 function getColorCount() {
-	return level < 5
-		? 3 : (level < 10 ? 4 : 5);
+	return level < 6
+		? 3 : (level < 11 ? 4 : 5);
 }
 
 const reloadLaucher = (lIdx) => {
@@ -227,9 +229,9 @@ const setLevelPoints = (amt) => {
 		finishLevel();
 	} else {
 		pointBar.querySelector("div").style.width =
-			`${(amt / levelTarget) * 100}%`;
+			`${(amt / levelTarget) * 98}%`;
 		pointBarVert.querySelector("div").style.height =
-			`${(amt / levelTarget) * 100}%`;
+			`${(amt / levelTarget) * 98}%`;
 		levelPoints = amt;
 	}
 }
@@ -245,7 +247,7 @@ function addLevelPoints(amt) {
 }
 
 function resetNewRowTimer() {
-	newRowTimer = level < 25 ? 31 - Math.floor(level / 2) : 10;
+	newRowTimer = 26;
 }
 
 window.setInterval(() => {
@@ -273,16 +275,16 @@ const startLevel = (lvl) => {
 
 	if (level === 1) {
 		addRows(5);
-	} else {
-		addRows(1);
+		mus1.play();
 	}
+
 	resetNewRowTimer();
 	addRowInterval = window
 		.setInterval(() =>  {
 			addRows(2);
 			resetNewRowTimer();
-
-		}, (level < 25 ? 31 - Math.floor(level / 2) : 10) * 1000
+			mus1.play();
+		}, 26000
 	);
 
 };
@@ -293,6 +295,19 @@ let clearWelcome = textFrameRenderer.drawText("Press start", {
 	fill: "white"
 });
 
+const onMouseMove = (name, {clientX, clientY}, scale) => {
+	const lX = getLauncher("0")._x;
+	const lY = getLauncher("0")._y;
+	const evX = clientX / scale;
+	const evY = clientY / scale;
+
+	getLauncher("0").ang = Math.atan2(
+		(evY - lY - marbleRadius / 2) / VIRT_WIDTH,
+		(evX - lX - marbleRadius / 2) / VIRT_WIDTH
+	) + (90 * (Math.PI / 180));
+	getLauncher("0").updated = true;
+}
+
 function gameOver() {
 	textLayer.style.backgroundColor = "#6669";
 
@@ -302,14 +317,15 @@ function gameOver() {
 
 	window.removeEventListener("gamepad-l-axis-x-change", onAxis);
 	window.removeEventListener("gamepad-a-pressed", onAPressed);
-
-
+	window.removeEventListener("click", onClick);
+	eventListeners.clear();
 	clearWelcome = textFrameRenderer.drawText("Game over! Press start", {
 		x: 150,
 		y: 500,
 		fill: "white"
 	});
 	window.addEventListener("gamepad-start-pressed", startGame);
+	window.addEventListener("click", startGame);
 }
 
 function onAxis({detail: {force, controllerIndex}}) {
@@ -327,23 +343,29 @@ function onAPressed({detail: { controllerIndex }}) {
 	launchMarble(controllerIndex);
 }
 
+function onClick() {
+	launchMarble("0");
+}
+
 function startGame() {
 	level = 0;
 	levelTarget = 250;
 	setLevelPoints(0);
 	setGamePoints(0);
-
 	clearMarbles();
 	forceRedraw();
 	clearWelcome();
 	textLayer.style.backgroundColor = "rgba(0,0,0,0)";
 	window.removeEventListener("gamepad-start-pressed", startGame);
+	window.removeEventListener("click", startGame);
 	window.addEventListener("gamepad-l-axis-x-change", onAxis);
 	window.addEventListener("gamepad-a-pressed", onAPressed);
-
+	window.addEventListener("click", onClick);
+	eventListeners.add("mousemove", onMouseMove);
+	reinitLaunchers(["0"]);
 	startLevel(1);
 }
 
 window.addEventListener("gamepad-start-pressed", startGame);
-
+window.addEventListener("click", startGame);
 initPadEvents({ onControllersChange: reinitLaunchers});
