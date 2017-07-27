@@ -24,6 +24,16 @@ class Launcher {
 		this.updated = true;
 	}
 
+	setAng(ang) {
+		this.ang = ang;
+		if (this.ang < minAng) {
+			this.ang = minAng;
+		}
+		if (this.ang > maxAng) {
+			this.ang = maxAng;
+		}
+
+	}
 	accelerate() {
 		const prevAng = this.ang;
 		if (this.acc < maxAcc && this.acc > -maxAcc) {

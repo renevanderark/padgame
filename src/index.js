@@ -301,15 +301,15 @@ const onMouseMove = (name, {clientX, clientY}, scale) => {
 	const evX = clientX / scale;
 	const evY = clientY / scale;
 
-	getLauncher("0").ang = Math.atan2(
+	getLauncher("0").setAng(Math.atan2(
 		(evY - lY - marbleRadius / 2) / VIRT_WIDTH,
 		(evX - lX - marbleRadius / 2) / VIRT_WIDTH
-	) + (90 * (Math.PI / 180));
+	) + (90 * (Math.PI / 180)));
 	getLauncher("0").updated = true;
 }
 
 function gameOver() {
-	textLayer.style.backgroundColor = "#6669";
+	textLayer.style.backgroundColor = "rgba(96,96,96,0.6)";
 
 	if (addRowInterval !== null) {
 		window.clearInterval(addRowInterval);
@@ -317,6 +317,10 @@ function gameOver() {
 
 	window.removeEventListener("gamepad-l-axis-x-change", onAxis);
 	window.removeEventListener("gamepad-a-pressed", onAPressed);
+	window.removeEventListener("gamepad-left-pressed", onLeftPressed);
+	window.removeEventListener("gamepad-left-released", onArrowReleased);
+	window.removeEventListener("gamepad-right-pressed", onRightPressed);
+	window.removeEventListener("gamepad-right-released", onArrowReleased);
 	window.removeEventListener("click", onClick);
 	eventListeners.clear();
 	clearWelcome = textFrameRenderer.drawText("Game over! Press start", {
@@ -343,6 +347,19 @@ function onAPressed({detail: { controllerIndex }}) {
 	launchMarble(controllerIndex);
 }
 
+function onRightPressed({detail: { controllerIndex }}) {
+	getLauncher(controllerIndex).accDir = 1;
+}
+
+function onLeftPressed({detail: { controllerIndex }}) {
+	getLauncher(controllerIndex).accDir = -1;
+}
+
+function onArrowReleased({detail: { controllerIndex }}) {
+	getLauncher(controllerIndex).acc = 0;
+	getLauncher(controllerIndex).accDir = 0;
+}
+
 function onClick() {
 	launchMarble("0");
 }
@@ -360,11 +377,17 @@ function startGame() {
 	window.removeEventListener("click", startGame);
 	window.addEventListener("gamepad-l-axis-x-change", onAxis);
 	window.addEventListener("gamepad-a-pressed", onAPressed);
+	window.addEventListener("gamepad-left-pressed", onLeftPressed);
+	window.addEventListener("gamepad-left-released", onArrowReleased);
+	window.addEventListener("gamepad-right-pressed", onRightPressed);
+	window.addEventListener("gamepad-right-released", onArrowReleased);
 	window.addEventListener("click", onClick);
 	eventListeners.add("mousemove", onMouseMove);
 	reinitLaunchers(["0"]);
 	startLevel(1);
 }
+
+textLayer.style.backgroundColor = "rgba(96,96,96,0.6)";
 
 window.addEventListener("gamepad-start-pressed", startGame);
 window.addEventListener("click", startGame);
