@@ -35,6 +35,9 @@ const textFrameRenderer = getFrameRenderer(textLayerCtx, VIRT_WIDTH);
 const colliders = getColliders(getMarbles);
 const getNeighboursImpl = getNeighbours(getMarbles, addLevelPoints);
 const mus1 = new Audio("./mus1.ogg");
+const crack = new Audio("./crack.ogg");
+const crack2 = new Audio("./crack2.ogg");
+const plock = new Audio("./plock.ogg");
 
 window.addEventListener("load", () => setTimeout(() => window.scrollTo(0, 1), 0));
 
@@ -377,6 +380,10 @@ function onClick() {
 }
 
 function startGame() {
+	mus1.play();
+	plock.play();
+	crack.play();
+	crack2.play();
 	level = 0;
 	levelTarget = 250;
 	setLevelPoints(0);
