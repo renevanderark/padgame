@@ -121,6 +121,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	var colliders = (0, _colliders2.default)(_marbles.getMarbles);
 	var getNeighboursImpl = (0, _neighbours.getNeighbours)(_marbles.getMarbles, addLevelPoints);
 	var mus1 = new Audio("./mus1.ogg");
+	var crack = new Audio("./crack.ogg");
+	var crack2 = new Audio("./crack2.ogg");
+	var plock = new Audio("./plock.ogg");
 
 	window.addEventListener("load", function () {
 		return setTimeout(function () {
@@ -471,6 +474,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	function startGame() {
+		mus1.play();
+		plock.play();
+		crack.play();
+		crack2.play();
 		level = 0;
 		levelTarget = 250;
 		setLevelPoints(0);
