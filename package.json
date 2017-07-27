@@ -5,7 +5,7 @@
   "main": "src/index.js",
   "scripts": {
     "start": "NODE_ENV=development webpack --colors --watch",
-    "build": "BUILD_TARGET=./build NODE_ENV=production webpack --optimize-minimize"
+    "build": "BUILD_TARGET=./build NODE_ENV=production webpack"
   },
   "author": "",
   "license": "MIT",

@@ -4,8 +4,7 @@ module.exports = {
   entry: "./src/index.js",
   output: {
     path: process.env.BUILD_TARGET || "./build",
-    filename: process.env.NODE_ENV === "development"
-      ? "index.js" : "padevents-dist-min.js",
+    filename: "index.js",
     library: "padEvents",
     libraryTarget: "umd"
   },
