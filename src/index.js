@@ -380,10 +380,6 @@ function onClick() {
 }
 
 function startGame() {
-	mus1.play();
-	plock.play();
-	crack.play();
-	crack2.play();
 	level = 0;
 	levelTarget = 250;
 	setLevelPoints(0);
@@ -404,7 +400,8 @@ function startGame() {
 	window.addEventListener("click", onClick);
 	window.addEventListener("touchend", onClick);
 	eventListeners.add("mousemove", onMouseMove);
-	eventListeners.add("touchmove", onTouchMove)
+	eventListeners.add("touchmove", onTouchMove);
+	eventListeners.add("touchstart", onTouchMove);
 	reinitLaunchers(["0"]);
 	startLevel(1);
 }
