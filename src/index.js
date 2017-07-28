@@ -121,15 +121,19 @@ window.setInterval(
 		removeReadyMarbles();
 		getLaunchers().forEach(l => {
 			l.accelerate();
+			l.accelerate();
+			l.accelerate();
 		});
 		getMarbles().forEach(m => {
+			m.accelerate();
+			m.accelerate();
 			m.accelerate();
 			if (m.snapped && !m.readyToBeRemoved && !m.markedForRemoval &&  m._y > VIRT_WIDTH - m.radius * 2) {
 				gameOver();
 			}
 		});
 	},
-  10
+  30
 );
 
 function getColorCount() {
@@ -168,7 +172,7 @@ const drawSwapBall = () => {
 		ctx.beginPath();
 		ctx.fillStyle = fills[swapBall.color];
 		ctx.arc(
-			marbleRadius * 0.5 + 5, marbleRadius * 0.5 + 5,
+			marbleRadius * 0.5 + 6, marbleRadius * 0.5 + 6,
 			marbleRadius * 0.5,  0, 2 * Math.PI, false
 		)
 		ctx.fill();
@@ -177,7 +181,7 @@ const drawSwapBall = () => {
 		ctx.beginPath();
 		ctx.fillStyle = strokes[swapBall.color];
 		ctx.arc(
-			marbleRadius * 0.5 + 5, marbleRadius * 0.5 + 5,
+			marbleRadius * 0.5 + 6, marbleRadius * 0.5 + 6,
 			(marbleRadius - 4) * 0.5,  Math.PI,  Math.PI * 1.5, false
 		);
 		ctx.fill();
