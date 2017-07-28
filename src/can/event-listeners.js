@@ -8,15 +8,21 @@ export default (vWidth) => {
 			height = h;
 			scale = w < h ? w / vWidth : h / vWidth;
 		},
-		add: (eventName, onEvent) => {
+		add: (eventName, onEvent, elem = window) => {
 			const fn = ev => onEvent(eventName, ev, scale);
 
-			registered.push({eventName: eventName, fn: fn});
-			window.addEventListener(eventName, fn);
+			registered.push({
+				elem: elem,
+				eventName:
+				eventName,
+				fn: fn
+			});
+
+			elem.addEventListener(eventName, fn);
 		},
 		clear: () => {
-			registered.forEach(({eventName, fn}) =>
-				window.removeEventListener(eventName, fn)
+			registered.forEach(({elem, eventName, fn}) =>
+				elem.removeEventListener(eventName, fn)
 			)
 		}
 	}

@@ -322,8 +322,6 @@ function gameOver() {
 	window.removeEventListener("gamepad-left-released", onArrowReleased);
 	window.removeEventListener("gamepad-right-pressed", onRightPressed);
 	window.removeEventListener("gamepad-right-released", onArrowReleased);
-	window.removeEventListener("click", onClick);
-	window.removeEventListener("touchend", onClick);
 	eventListeners.clear();
 	clearWelcome = textFrameRenderer.drawText("Game over! Press start", {
 		x: 150,
@@ -385,11 +383,11 @@ function startGame() {
 	window.addEventListener("gamepad-left-released", onArrowReleased);
 	window.addEventListener("gamepad-right-pressed", onRightPressed);
 	window.addEventListener("gamepad-right-released", onArrowReleased);
-	window.addEventListener("click", onClick);
-	window.addEventListener("touchend", onClick);
-	eventListeners.add("mousemove", onMouseMove);
-	eventListeners.add("touchmove", onTouchMove);
-	eventListeners.add("touchstart", onTouchMove);
+	eventListeners.add("click", onClick, textLayer);
+	eventListeners.add("touchend", onClick, textLayer);
+	eventListeners.add("mousemove", onMouseMove, textLayer);
+	eventListeners.add("touchmove", onTouchMove, textLayer);
+	eventListeners.add("touchstart", onTouchMove, textLayer);
 	reinitLaunchers(["0"]);
 
 	resetNewRowTimer();
