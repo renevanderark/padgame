@@ -202,14 +202,18 @@ return /******/ (function(modules) { // webpackBootstrap
 		(0, _marbles.removeReadyMarbles)();
 		(0, _launcher.getLaunchers)().forEach(function (l) {
 			l.accelerate();
+			l.accelerate();
+			l.accelerate();
 		});
 		(0, _marbles.getMarbles)().forEach(function (m) {
+			m.accelerate();
+			m.accelerate();
 			m.accelerate();
 			if (m.snapped && !m.readyToBeRemoved && !m.markedForRemoval && m._y > _virtWidth2.default - m.radius * 2) {
 				gameOver();
 			}
 		});
-	}, 10);
+	}, 30);
 
 	function getColorCount() {
 		return level < 6 ? 3 : level < 16 ? 4 : 5;
