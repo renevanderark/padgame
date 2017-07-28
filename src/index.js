@@ -25,8 +25,9 @@ const textLayer = document.getElementById("text-layer");
 const textLayerCtx = textLayer.getContext("2d");
 const infoDiv = document.getElementById("info");
 const pointBar = document.getElementById("point-bar");
+const pointBarContainer = document.getElementById("point-bar-container");
 const pointBarVert = document.getElementById("point-bar-vert");
-
+const pointBarVertContainer = document.getElementById("point-bar-vert-container");
 const ballFrameRenderer = getFrameRenderer(ballLayerCtx, VIRT_WIDTH);
 const snapFrameRenderer = getFrameRenderer(snapLayerCtx, VIRT_WIDTH);
 const launcherFrameRenderer = getFrameRenderer(launcherLayerCtx, VIRT_WIDTH);
@@ -77,24 +78,24 @@ initViewPort(getResizeListeners([ballLayer, snapLayer, launcherLayer, textLayer]
 	forceRedraw,
 	(w, h) => {
 		if (w > h) {
-			pointBar.style.display = "none";
-			pointBarVert.style.display = "block";
-			pointBarVert.style.height = `${h}px`;
-			pointBarVert.style.left = `${h + 20}px`;
-			infoDiv.style.left = `${h + 50}px`;
+			pointBarContainer.style.display = "none";
+			pointBarVertContainer.style.display = "block";
+			pointBarVertContainer.style.height = `${h}px`;
+			pointBarVertContainer.style.left = `${h + 20}px`;
+			infoDiv.style.left = `${h + 70}px`;
 			infoDiv.style.top = "10px";
-			infoDiv.style.width = `${w - h - 40}px`;
+			infoDiv.style.width = `${w - h - 60}px`;
 			infoDiv.style.height = `${h / 2}px`;
 			infoDiv.style.fontSize = `${h / 15}px`;
 		} else {
-			pointBar.style.display = "block";
-			pointBarVert.style.display = "none";
-			pointBar.style.width = `${w}px`;
-			pointBar.style.top = `${w + 20}px`;
-			infoDiv.style.top = `${w + 50}px`;
+			pointBarVertContainer.style.display = "none";
+			pointBarContainer.style.display = "block";
+			pointBarContainer.style.width = `${w}px`;
+			pointBarContainer.style.top = `${w + 20}px`;
+			infoDiv.style.top = `${w + 70}px`;
 			infoDiv.style.width = `${w}px`;
 			infoDiv.style.left = `10px`;
-			infoDiv.style.height = `${h - w - 40}px`;
+			infoDiv.style.height = `${h - w - 60}px`;
 			infoDiv.style.fontSize = `${w / 15}px`;
 		}
 	}
@@ -259,8 +260,8 @@ let gamePoints = 0;
 let newRowTimer = 0;
 
 function finishLevel() {
-	pointBar.querySelector("div").style.width = "98%";
-	pointBarVert.querySelector("div").style.height = "98%";
+	pointBar.querySelector("div").style.width = "100%";
+	pointBarVert.querySelector("div").style.height = "100%";
 	levelPoints = 0;
 	textFrameRenderer
 		.drawText("Well done!", {x: 360, y: 500, fill: "white", timeout: 1250});
@@ -272,9 +273,9 @@ const setLevelPoints = (amt) => {
 		finishLevel();
 	} else {
 		pointBar.querySelector("div").style.width =
-			`${parseInt((amt / levelTarget) * 98)}%`;
+			`${parseInt((amt / levelTarget) * 100)}%`;
 		pointBarVert.querySelector("div").style.height =
-			`${parseInt((amt / levelTarget) * 98)}%`;
+			`${parseInt((amt / levelTarget) * 100)}%`;
 		levelPoints = amt;
 	}
 }
