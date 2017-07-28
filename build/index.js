@@ -375,12 +375,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	var setLevelPoints = function setLevelPoints(amt) {
-		if (levelPoints >= levelTarget) {
+		levelPoints = amt;
+		if (amt >= levelTarget) {
 			finishLevel();
 		} else {
-			pointBar.querySelector("div").style.width = parseInt(amt / levelTarget * 100) + "%";
-			pointBarVert.querySelector("div").style.height = parseInt(amt / levelTarget * 100) + "%";
-			levelPoints = amt;
+			var perc = amt / levelTarget;
+			pointBar.querySelector("div").style.width = parseInt((perc > 1 ? 1 : perc) * 100) + "%";
+			pointBarVert.querySelector("div").style.height = parseInt((perc > 1 ? 1 : perc) * 100) + "%";
 		}
 	};
 
@@ -660,7 +661,7 @@ return /******/ (function(modules) { // webpackBootstrap
 				ctx.fillText(txt, _x, _y);
 				var width = ctx.measureText(txt).width;
 				var doClear = function doClear() {
-					return ctx.clearRect(_x, _y - 50 * scale, width + 5, 50 * scale);
+					return ctx.clearRect(_x, _y - 55 * scale, width + 5, 55 * scale);
 				};
 				if (timeout) {
 					setTimeout(doClear, timeout || 500);
