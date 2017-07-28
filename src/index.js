@@ -133,11 +133,11 @@ window.setInterval(
 
 function getColorCount() {
 	return level < 6
-		? 3 : (level < 11 ? 4 : 5);
+		? 3 : (level < 16 ? 4 : 5);
 }
 
-const reloadLaucher = (lIdx) => {
-	const l = getLauncher(lIdx);
+const reloadLaucher = (lIdx, launcher = null) => {
+	const l = launcher || getLauncher(lIdx);
 	if (!l.marble) {
 		l.marble = new Marble({
 			x: l._x, y: l._y,
@@ -272,9 +272,6 @@ const startLevel = (lvl) => {
 	if (level === 1) { clearMarbles(); }
 	setLevelPoints(0);
 	forceRedraw();
-	if (addRowInterval !== null) {
-		window.clearInterval(addRowInterval);
-	}
 
 	textFrameRenderer
 		.drawText(`Level ${lvl}!`, {x: 360, y: 500, fill: "white", timeout: 1250});
@@ -283,15 +280,6 @@ const startLevel = (lvl) => {
 		addRows(5);
 		mus1.play();
 	}
-
-	resetNewRowTimer();
-	addRowInterval = window
-		.setInterval(() =>  {
-			addRows(2);
-			resetNewRowTimer();
-			mus1.play();
-		}, 26000
-	);
 
 };
 
@@ -403,8 +391,22 @@ function startGame() {
 	eventListeners.add("touchmove", onTouchMove);
 	eventListeners.add("touchstart", onTouchMove);
 	reinitLaunchers(["0"]);
+
+	resetNewRowTimer();
+	addRowInterval = window
+		.setInterval(() =>  {
+			addRows(2);
+			resetNewRowTimer();
+			mus1.play();
+		}, 26000
+	);
 	startLevel(1);
 }
+getLaunchers().forEach(l => {
+	l.marble = null;
+	reloadLaucher(null, l);
+});
+
 
 textLayer.style.backgroundColor = "rgba(96,96,96,0.6)";
 
