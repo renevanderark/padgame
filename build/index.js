@@ -249,13 +249,13 @@ return /******/ (function(modules) { // webpackBootstrap
 			ctx.clearRect(0, 0, 40, 40);
 			ctx.beginPath();
 			ctx.fillStyle = _colors.fills[swapBall.color];
-			ctx.arc(marbleRadius * 0.5 + 5, marbleRadius * 0.5 + 5, marbleRadius * 0.5, 0, 2 * Math.PI, false);
+			ctx.arc(marbleRadius * 0.5 + 6, marbleRadius * 0.5 + 6, marbleRadius * 0.5, 0, 2 * Math.PI, false);
 			ctx.fill();
 			ctx.closePath();
 
 			ctx.beginPath();
 			ctx.fillStyle = _colors.strokes[swapBall.color];
-			ctx.arc(marbleRadius * 0.5 + 5, marbleRadius * 0.5 + 5, (marbleRadius - 4) * 0.5, Math.PI, Math.PI * 1.5, false);
+			ctx.arc(marbleRadius * 0.5 + 6, marbleRadius * 0.5 + 6, (marbleRadius - 4) * 0.5, Math.PI, Math.PI * 1.5, false);
 			ctx.fill();
 			ctx.closePath();
 		});
@@ -665,7 +665,7 @@ return /******/ (function(modules) { // webpackBootstrap
 				ctx.fillText(txt, _x, _y);
 				var width = ctx.measureText(txt).width;
 				var doClear = function doClear() {
-					return ctx.clearRect(_x, _y - 55 * scale, width + 5, 55 * scale);
+					return ctx.clearRect(_x, _y - 55 * scale, width + 5, 56 * scale);
 				};
 				if (timeout) {
 					setTimeout(doClear, timeout || 500);
