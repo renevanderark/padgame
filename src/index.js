@@ -297,14 +297,15 @@ function finishLevel() {
 }
 
 const setLevelPoints = (amt) => {
-	if (levelPoints >= levelTarget) {
+	levelPoints = amt;
+	if (amt >= levelTarget) {
 		finishLevel();
 	} else {
+		const perc = amt / levelTarget;
 		pointBar.querySelector("div").style.width =
-			`${parseInt((amt / levelTarget) * 100)}%`;
+			`${parseInt((perc > 1 ? 1 : perc) * 100)}%`;
 		pointBarVert.querySelector("div").style.height =
-			`${parseInt((amt / levelTarget) * 100)}%`;
-		levelPoints = amt;
+			`${parseInt((perc > 1 ? 1 : perc)) * 100)}%`;
 	}
 }
 
