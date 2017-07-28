@@ -136,17 +136,54 @@ function getColorCount() {
 		? 3 : (level < 16 ? 4 : 5);
 }
 
-const makeSwapBall = (colorCount = 3) => ({
-	color: parseInt(Math.random() * colorCount) + 1,
-	radius: 30,
+
+const marbleRadius = 30;
+const baseMarbleOpts = {
+	radius: marbleRadius,
+	angle: 90 * (Math.PI / 180),
+	snapped: true,
 	collidesWithMarble: colliders.marbleCollidesWithMarble,
 	getNeighbours: getNeighboursImpl.getNeighbours,
 	detectFall: getNeighboursImpl.detectFall,
-	clearScreen: forceRedraw,
-	addPoints: addLevelPoints
+	addPoints: addLevelPoints,
+	clearScreen: forceRedraw
+};
+
+const makeSwapBall = (colorCount = 3) => ({
+	...baseMarbleOpts,
+	snapped: false,
+	angle: 0,
+	x: 0,
+	y: 0,
+	color: parseInt(Math.random() * colorCount) + 1,
 });
 
 let swapBall = makeSwapBall();
+
+const makeSwapBallFromMarble = (marble) => ({
+	...baseMarbleOpts,
+	snapped: false,
+	angle: 0,
+	x: 0,
+	y: 0,
+	color: marble.color
+});
+
+const swapBalls = (controllerIndex) => {
+	const l = getLauncher(controllerIndex);
+	const orig = l.marble;
+	if (orig !== null) {
+		const swap = new Marble({
+			...swapBall,
+			x: l._x,
+			y: l._y,
+			angle: l.ang - (90 * (Math.PI / 180))
+		});
+		swapBall = makeSwapBallFromMarble(orig);
+		l.marble = swap;
+		forceRedraw();
+	}
+}
 
 const reloadLaucher = (lIdx, launcher = null) => {
 	const l = launcher || getLauncher(lIdx);
@@ -167,17 +204,7 @@ const launchMarble = (lIdx) => {
 	}
 }
 
-const marbleRadius = 30;
-const baseMarbleOpts = {
-	radius: marbleRadius,
-	angle: 90 * (Math.PI / 180),
-	snapped: true,
-	collidesWithMarble: colliders.marbleCollidesWithMarble,
-	getNeighbours: getNeighboursImpl.getNeighbours,
-	detectFall: getNeighboursImpl.detectFall,
-	addPoints: addLevelPoints,
-	clearScreen: forceRedraw
-};
+
 
 const addRows = (rows) => {
 	for (let row = 0; row < rows; row++) {
@@ -328,10 +355,12 @@ function gameOver() {
 
 	window.removeEventListener("gamepad-l-axis-x-change", onAxis);
 	window.removeEventListener("gamepad-a-pressed", onAPressed);
+	window.removeEventListener("gamepad-b-pressed", onBPressed);
 	window.removeEventListener("gamepad-left-pressed", onLeftPressed);
 	window.removeEventListener("gamepad-left-released", onArrowReleased);
 	window.removeEventListener("gamepad-right-pressed", onRightPressed);
 	window.removeEventListener("gamepad-right-released", onArrowReleased);
+	window.removeEventListener("contextmenu", onRightClick);
 	eventListeners.clear();
 	clearWelcome = textFrameRenderer.drawText("Game over! Press start", {
 		x: 150,
@@ -356,6 +385,16 @@ function onAxis({detail: {force, controllerIndex}}) {
 
 function onAPressed({detail: { controllerIndex }}) {
 	launchMarble(controllerIndex);
+}
+
+function onBPressed({detail: { controllerIndex }}) {
+	swapBalls(controllerIndex);
+}
+
+function onRightClick(ev) {
+	ev.preventDefault();
+	swapBalls("0");
+	return false;
 }
 
 function onRightPressed({detail: { controllerIndex }}) {
@@ -389,10 +428,12 @@ function startGame() {
 	window.removeEventListener("touchstart", startGame);
 	window.addEventListener("gamepad-l-axis-x-change", onAxis);
 	window.addEventListener("gamepad-a-pressed", onAPressed);
+	window.addEventListener("gamepad-b-pressed", onBPressed);
 	window.addEventListener("gamepad-left-pressed", onLeftPressed);
 	window.addEventListener("gamepad-left-released", onArrowReleased);
 	window.addEventListener("gamepad-right-pressed", onRightPressed);
 	window.addEventListener("gamepad-right-released", onArrowReleased);
+	window.addEventListener("contextmenu", onRightClick);
 	eventListeners.add("click", onClick, textLayer);
 	eventListeners.add("touchend", onClick, textLayer);
 	eventListeners.add("mousemove", onMouseMove, textLayer);
