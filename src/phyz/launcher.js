@@ -9,7 +9,7 @@ let launchers = {};
 const getLaunchers = () =>
 	Object.keys(launchers).map(k => launchers[k]);
 
-
+const marbleRadius = 30;
 class Launcher {
 
 	constructor({ x, y, fill, collidesWithMarble }) {
@@ -61,17 +61,18 @@ class Launcher {
 		let x = X, y = Y, ang = ANG,
 			minX = X, minY = Y, maxX = X, maxY = Y;
 		ctx.beginPath();
-		ctx.strokeStyle = "rgba(255, 128, 128, 0.9)";
+		ctx.strokeStyle = "rgba(255, 128, 128, 0.4)";
+		ctx.lineWidth = marbleRadius * 2 * scale;
 		ctx.moveTo(x * scale, y * scale);
 
 		while (y > 0) {
 			x = x + Math.cos(ang);
 			y = y + Math.sin(ang);
-			minY = y < minY ? y : minY;
-			maxY = y > maxY ? y : maxY;
-			minX = x < minX ? x : minX;
-			maxX = x > maxX ? x : maxX;
-			if (x <= 0 || x >= VIRT_WIDTH) {
+			minY = y - marbleRadius < minY ? y - marbleRadius: minY ;
+			maxY = y + marbleRadius > maxY ? y + marbleRadius : maxY;
+			minX = x - marbleRadius < minX ? x - marbleRadius : minX;
+			maxX = x + marbleRadius > maxX ? x + marbleRadius : maxX;
+			if (x <= marbleRadius || x >= VIRT_WIDTH - marbleRadius) {
 				const xDeg = y >= VIRT_WIDTH ? 0 : 90;
 				const yDeg = ang / (Math.PI / 180);
 				const zDeg = Math.PI + (2*xDeg) - yDeg;
