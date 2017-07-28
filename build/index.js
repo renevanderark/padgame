@@ -111,8 +111,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	var textLayerCtx = textLayer.getContext("2d");
 	var infoDiv = document.getElementById("info");
 	var pointBar = document.getElementById("point-bar");
+	var pointBarContainer = document.getElementById("point-bar-container");
 	var pointBarVert = document.getElementById("point-bar-vert");
-
+	var pointBarVertContainer = document.getElementById("point-bar-vert-container");
 	var ballFrameRenderer = (0, _frameRenderer2.default)(ballLayerCtx, _virtWidth2.default);
 	var snapFrameRenderer = (0, _frameRenderer2.default)(snapLayerCtx, _virtWidth2.default);
 	var launcherFrameRenderer = (0, _frameRenderer2.default)(launcherLayerCtx, _virtWidth2.default);
@@ -166,24 +167,24 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	(0, _viewport2.default)((0, _resizeListeners2.default)([ballLayer, snapLayer, launcherLayer, textLayer], ballFrameRenderer.onResize, snapFrameRenderer.onResize, launcherFrameRenderer.onResize, textFrameRenderer.onResize, eventListeners.onResize, forceRedraw, function (w, h) {
 		if (w > h) {
-			pointBar.style.display = "none";
-			pointBarVert.style.display = "block";
-			pointBarVert.style.height = h + "px";
-			pointBarVert.style.left = h + 20 + "px";
-			infoDiv.style.left = h + 50 + "px";
+			pointBarContainer.style.display = "none";
+			pointBarVertContainer.style.display = "block";
+			pointBarVertContainer.style.height = h + "px";
+			pointBarVertContainer.style.left = h + 20 + "px";
+			infoDiv.style.left = h + 70 + "px";
 			infoDiv.style.top = "10px";
-			infoDiv.style.width = w - h - 40 + "px";
+			infoDiv.style.width = w - h - 60 + "px";
 			infoDiv.style.height = h / 2 + "px";
 			infoDiv.style.fontSize = h / 15 + "px";
 		} else {
-			pointBar.style.display = "block";
-			pointBarVert.style.display = "none";
-			pointBar.style.width = w + "px";
-			pointBar.style.top = w + 20 + "px";
-			infoDiv.style.top = w + 50 + "px";
+			pointBarVertContainer.style.display = "none";
+			pointBarContainer.style.display = "block";
+			pointBarContainer.style.width = w + "px";
+			pointBarContainer.style.top = w + 20 + "px";
+			infoDiv.style.top = w + 70 + "px";
 			infoDiv.style.width = w + "px";
 			infoDiv.style.left = "10px";
-			infoDiv.style.height = h - w - 40 + "px";
+			infoDiv.style.height = h - w - 60 + "px";
 			infoDiv.style.fontSize = w / 15 + "px";
 		}
 	}));
@@ -211,22 +212,87 @@ return /******/ (function(modules) { // webpackBootstrap
 	}, 10);
 
 	function getColorCount() {
-		return level < 6 ? 3 : level < 11 ? 4 : 5;
+		return level < 6 ? 3 : level < 16 ? 4 : 5;
 	}
 
+	var marbleRadius = 30;
+	var baseMarbleOpts = {
+		radius: marbleRadius,
+		angle: 90 * (Math.PI / 180),
+		snapped: true,
+		collidesWithMarble: colliders.marbleCollidesWithMarble,
+		getNeighbours: getNeighboursImpl.getNeighbours,
+		detectFall: getNeighboursImpl.detectFall,
+		addPoints: addLevelPoints,
+		clearScreen: forceRedraw
+	};
+
+	var makeSwapBall = function makeSwapBall() {
+		var colorCount = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 3;
+		return _extends({}, baseMarbleOpts, {
+			snapped: false,
+			angle: 0,
+			x: 0,
+			y: 0,
+			color: parseInt(Math.random() * colorCount) + 1
+		});
+	};
+
+	var swapBall = makeSwapBall();
+	var drawSwapBall = function drawSwapBall() {
+		document.querySelectorAll(".swap-ball").forEach(function (bc) {
+			var ctx = bc.getContext('2d');
+			ctx.clearRect(0, 0, 40, 40);
+			ctx.beginPath();
+			ctx.fillStyle = _colors.fills[swapBall.color];
+			ctx.arc(marbleRadius * 0.5 + 5, marbleRadius * 0.5 + 5, marbleRadius * 0.5, 0, 2 * Math.PI, false);
+			ctx.fill();
+			ctx.closePath();
+
+			ctx.beginPath();
+			ctx.fillStyle = _colors.strokes[swapBall.color];
+			ctx.arc(marbleRadius * 0.5 + 5, marbleRadius * 0.5 + 5, (marbleRadius - 4) * 0.5, Math.PI, Math.PI * 1.5, false);
+			ctx.fill();
+			ctx.closePath();
+		});
+	};
+	drawSwapBall();
+
+	var makeSwapBallFromMarble = function makeSwapBallFromMarble(marble) {
+		return _extends({}, baseMarbleOpts, {
+			snapped: false,
+			angle: 0,
+			x: 0,
+			y: 0,
+			color: marble.color
+		});
+	};
+
+	var swapBalls = function swapBalls(controllerIndex) {
+		var l = (0, _launcher.getLauncher)(controllerIndex);
+		var orig = l.marble;
+		if (orig !== null) {
+			var swap = new _marble2.default(_extends({}, swapBall, {
+				x: l._x,
+				y: l._y,
+				angle: l.ang - 90 * (Math.PI / 180)
+			}));
+			swapBall = makeSwapBallFromMarble(orig);
+			drawSwapBall();
+			l.marble = swap;
+			forceRedraw();
+		}
+	};
+
 	var reloadLaucher = function reloadLaucher(lIdx) {
-		var l = (0, _launcher.getLauncher)(lIdx);
+		var launcher = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+
+		var l = launcher || (0, _launcher.getLauncher)(lIdx);
 		if (!l.marble) {
-			l.marble = new _marble2.default({
-				x: l._x, y: l._y,
-				color: parseInt(Math.random() * getColorCount()) + 1,
-				radius: 30, angle: l.ang - 90 * (Math.PI / 180),
-				collidesWithMarble: colliders.marbleCollidesWithMarble,
-				getNeighbours: getNeighboursImpl.getNeighbours,
-				detectFall: getNeighboursImpl.detectFall,
-				clearScreen: forceRedraw,
-				addPoints: addLevelPoints
-			});
+			l.marble = new _marble2.default(_extends({}, swapBall, { x: l._x, y: l._y, angle: l.ang - 90 * (Math.PI / 180)
+			}));
+			swapBall = makeSwapBall(getColorCount());
+			drawSwapBall();
 		}
 	};
 
@@ -239,18 +305,6 @@ return /******/ (function(modules) { // webpackBootstrap
 				return reloadLaucher(lIdx);
 			}, 500);
 		}
-	};
-
-	var marbleRadius = 30;
-	var baseMarbleOpts = {
-		radius: marbleRadius,
-		angle: 90 * (Math.PI / 180),
-		snapped: true,
-		collidesWithMarble: colliders.marbleCollidesWithMarble,
-		getNeighbours: getNeighboursImpl.getNeighbours,
-		detectFall: getNeighboursImpl.detectFall,
-		addPoints: addLevelPoints,
-		clearScreen: forceRedraw
 	};
 
 	var addRows = function addRows(rows) {
@@ -273,9 +327,13 @@ return /******/ (function(modules) { // webpackBootstrap
 		controllerIndices.filter(function (c, idx) {
 			return idx < 2;
 		}).forEach(function (idx) {
-			(0, _launcher.getLauncher)(idx, new _launcher2.default({}), function () {
+			var l = (0, _launcher.getLauncher)(idx, new _launcher2.default({}), function () {
 				return reloadLaucher(idx);
 			});
+			l.updated = true;
+			if (l.marble) {
+				l.marble.updated = true;
+			}
 		});
 
 		if (controllerIndices.length === 1 && (0, _launcher.getLaunchers)().length > 1) {
@@ -307,8 +365,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	var newRowTimer = 0;
 
 	function finishLevel() {
-		pointBar.querySelector("div").style.width = "98%";
-		pointBarVert.querySelector("div").style.height = "98%";
+		pointBar.querySelector("div").style.width = "100%";
+		pointBarVert.querySelector("div").style.height = "100%";
 		levelPoints = 0;
 		textFrameRenderer.drawText("Well done!", { x: 360, y: 500, fill: "white", timeout: 1250 });
 		setTimeout(function () {
@@ -320,8 +378,8 @@ return /******/ (function(modules) { // webpackBootstrap
 		if (levelPoints >= levelTarget) {
 			finishLevel();
 		} else {
-			pointBar.querySelector("div").style.width = parseInt(amt / levelTarget * 98) + "%";
-			pointBarVert.querySelector("div").style.height = parseInt(amt / levelTarget * 98) + "%";
+			pointBar.querySelector("div").style.width = parseInt(amt / levelTarget * 100) + "%";
+			pointBarVert.querySelector("div").style.height = parseInt(amt / levelTarget * 100) + "%";
 			levelPoints = amt;
 		}
 	};
@@ -358,9 +416,6 @@ return /******/ (function(modules) { // webpackBootstrap
 		}
 		setLevelPoints(0);
 		forceRedraw();
-		if (addRowInterval !== null) {
-			window.clearInterval(addRowInterval);
-		}
 
 		textFrameRenderer.drawText("Level " + lvl + "!", { x: 360, y: 500, fill: "white", timeout: 1250 });
 
@@ -368,13 +423,6 @@ return /******/ (function(modules) { // webpackBootstrap
 			addRows(5);
 			mus1.play();
 		}
-
-		resetNewRowTimer();
-		addRowInterval = window.setInterval(function () {
-			addRows(2);
-			resetNewRowTimer();
-			mus1.play();
-		}, 26000);
 	};
 
 	var clearWelcome = textFrameRenderer.drawText("Press start", {
@@ -412,12 +460,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 		window.removeEventListener("gamepad-l-axis-x-change", onAxis);
 		window.removeEventListener("gamepad-a-pressed", onAPressed);
+		window.removeEventListener("gamepad-b-pressed", onBPressed);
 		window.removeEventListener("gamepad-left-pressed", onLeftPressed);
 		window.removeEventListener("gamepad-left-released", onArrowReleased);
 		window.removeEventListener("gamepad-right-pressed", onRightPressed);
 		window.removeEventListener("gamepad-right-released", onArrowReleased);
-		window.removeEventListener("click", onClick);
-		window.removeEventListener("touchend", onClick);
+		window.removeEventListener("contextmenu", onRightClick);
 		eventListeners.clear();
 		clearWelcome = textFrameRenderer.drawText("Game over! Press start", {
 			x: 150,
@@ -450,20 +498,36 @@ return /******/ (function(modules) { // webpackBootstrap
 		launchMarble(controllerIndex);
 	}
 
-	function onRightPressed(_ref4) {
+	function onBPressed(_ref4) {
 		var controllerIndex = _ref4.detail.controllerIndex;
+
+		swapBalls(controllerIndex);
+	}
+
+	function onRightClick(ev) {
+		ev.preventDefault();
+		swapBalls("0");
+		return false;
+	}
+
+	function onSwapBallClick() {
+		swapBalls("0");
+	}
+
+	function onRightPressed(_ref5) {
+		var controllerIndex = _ref5.detail.controllerIndex;
 
 		(0, _launcher.getLauncher)(controllerIndex).accDir = 1;
 	}
 
-	function onLeftPressed(_ref5) {
-		var controllerIndex = _ref5.detail.controllerIndex;
+	function onLeftPressed(_ref6) {
+		var controllerIndex = _ref6.detail.controllerIndex;
 
 		(0, _launcher.getLauncher)(controllerIndex).accDir = -1;
 	}
 
-	function onArrowReleased(_ref6) {
-		var controllerIndex = _ref6.detail.controllerIndex;
+	function onArrowReleased(_ref7) {
+		var controllerIndex = _ref7.detail.controllerIndex;
 
 		(0, _launcher.getLauncher)(controllerIndex).acc = 0;
 		(0, _launcher.getLauncher)(controllerIndex).accDir = 0;
@@ -487,16 +551,36 @@ return /******/ (function(modules) { // webpackBootstrap
 		window.removeEventListener("touchstart", startGame);
 		window.addEventListener("gamepad-l-axis-x-change", onAxis);
 		window.addEventListener("gamepad-a-pressed", onAPressed);
+		window.addEventListener("gamepad-b-pressed", onBPressed);
 		window.addEventListener("gamepad-left-pressed", onLeftPressed);
 		window.addEventListener("gamepad-left-released", onArrowReleased);
 		window.addEventListener("gamepad-right-pressed", onRightPressed);
 		window.addEventListener("gamepad-right-released", onArrowReleased);
-		window.addEventListener("click", onClick);
-		window.addEventListener("touchend", onClick);
-		eventListeners.add("mousemove", onMouseMove);
-		eventListeners.add("touchmove", onTouchMove);
-		eventListeners.add("touchstart", onTouchMove);
-		reinitLaunchers(["0"]);
+		window.addEventListener("contextmenu", onRightClick);
+		eventListeners.add("click", onClick, textLayer);
+		eventListeners.add("touchend", onClick, textLayer);
+		eventListeners.add("mousemove", onMouseMove, textLayer);
+		eventListeners.add("touchmove", onTouchMove, textLayer);
+		eventListeners.add("touchstart", onTouchMove, textLayer);
+		document.querySelectorAll(".swap-ball").forEach(function (bc) {
+			eventListeners.add("click", onSwapBallClick, bc);
+		});
+		if ((0, _launcher.getLaunchers)().length === 0) {
+			reinitLaunchers(["0"]);
+		}
+
+		resetNewRowTimer();
+		addRowInterval = window.setInterval(function () {
+			addRows(2);
+			resetNewRowTimer();
+			mus1.play();
+		}, 26000);
+		swapBall = makeSwapBall();
+		drawSwapBall();
+		(0, _launcher.getLaunchers)().forEach(function (l) {
+			l.marble = null;
+			reloadLaucher(null, l);
+		});
 		startLevel(1);
 	}
 
@@ -655,18 +739,26 @@ return /******/ (function(modules) { // webpackBootstrap
 				scale = w < h ? w / vWidth : h / vWidth;
 			},
 			add: function add(eventName, onEvent) {
+				var elem = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : window;
+
 				var fn = function fn(ev) {
 					return onEvent(eventName, ev, scale);
 				};
 
-				registered.push({ eventName: eventName, fn: fn });
-				window.addEventListener(eventName, fn);
+				registered.push({
+					elem: elem,
+					eventName: eventName,
+					fn: fn
+				});
+
+				elem.addEventListener(eventName, fn);
 			},
 			clear: function clear() {
 				registered.forEach(function (_ref) {
-					var eventName = _ref.eventName,
+					var elem = _ref.elem,
+					    eventName = _ref.eventName,
 					    fn = _ref.fn;
-					return window.removeEventListener(eventName, fn);
+					return elem.removeEventListener(eventName, fn);
 				});
 			}
 		};
@@ -706,6 +798,8 @@ return /******/ (function(modules) { // webpackBootstrap
 			return launchers[k];
 		});
 	};
+
+	var marbleRadius = 30;
 
 	var Launcher = function () {
 		function Launcher(_ref) {
@@ -773,17 +867,18 @@ return /******/ (function(modules) { // webpackBootstrap
 				    maxX = X,
 				    maxY = Y;
 				ctx.beginPath();
-				ctx.strokeStyle = "rgba(255, 128, 128, 0.9)";
+				ctx.strokeStyle = "rgba(255, 128, 128, 0.2)";
+				ctx.lineWidth = marbleRadius * 2 * scale;
 				ctx.moveTo(x * scale, y * scale);
 
 				while (y > 0) {
 					x = x + Math.cos(ang);
 					y = y + Math.sin(ang);
-					minY = y < minY ? y : minY;
-					maxY = y > maxY ? y : maxY;
-					minX = x < minX ? x : minX;
-					maxX = x > maxX ? x : maxX;
-					if (x <= 0 || x >= _virtWidth2.default) {
+					minY = y - marbleRadius < minY ? y - marbleRadius : minY;
+					maxY = y + marbleRadius > maxY ? y + marbleRadius : maxY;
+					minX = x - marbleRadius < minX ? x - marbleRadius : minX;
+					maxX = x + marbleRadius > maxX ? x + marbleRadius : maxX;
+					if (x <= marbleRadius || x >= _virtWidth2.default - marbleRadius) {
 						var xDeg = y >= _virtWidth2.default ? 0 : 90;
 						var yDeg = ang / (Math.PI / 180);
 						var zDeg = Math.PI + 2 * xDeg - yDeg;
