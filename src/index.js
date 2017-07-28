@@ -136,19 +136,25 @@ function getColorCount() {
 		? 3 : (level < 16 ? 4 : 5);
 }
 
+const makeSwapBall = (colorCount = 3) => ({
+	color: parseInt(Math.random() * colorCount) + 1,
+	radius: 30,
+	collidesWithMarble: colliders.marbleCollidesWithMarble,
+	getNeighbours: getNeighboursImpl.getNeighbours,
+	detectFall: getNeighboursImpl.detectFall,
+	clearScreen: forceRedraw,
+	addPoints: addLevelPoints
+});
+
+let swapBall = makeSwapBall();
+
 const reloadLaucher = (lIdx, launcher = null) => {
 	const l = launcher || getLauncher(lIdx);
 	if (!l.marble) {
 		l.marble = new Marble({
-			x: l._x, y: l._y,
-			color: parseInt(Math.random() * getColorCount()) + 1,
-			radius: 30, angle: l.ang - (90 * (Math.PI / 180)),
-			collidesWithMarble: colliders.marbleCollidesWithMarble,
-			getNeighbours: getNeighboursImpl.getNeighbours,
-			detectFall: getNeighboursImpl.detectFall,
-			clearScreen: forceRedraw,
-			addPoints: addLevelPoints
+			...swapBall, x: l._x, y: l._y, angle: l.ang - (90 * (Math.PI / 180))
 		});
+		swapBall = makeSwapBall(getColorCount());
 	}
 }
 
@@ -190,7 +196,11 @@ const reinitLaunchers = (controllerIndices) => {
 	controllerIndices
 		.filter((c,idx) => idx < 2)
 		.forEach(idx => {
-			getLauncher(idx, new Launcher({}), () => reloadLaucher(idx));
+			const l = getLauncher(idx, new Launcher({}), () => reloadLaucher(idx));
+			l.updated = true;
+			if (l.marble) {
+				l.marble.updated = true;
+			}
 		});
 
 	if (controllerIndices.length === 1 && getLaunchers().length > 1) {
@@ -388,7 +398,10 @@ function startGame() {
 	eventListeners.add("mousemove", onMouseMove, textLayer);
 	eventListeners.add("touchmove", onTouchMove, textLayer);
 	eventListeners.add("touchstart", onTouchMove, textLayer);
-	reinitLaunchers(["0"]);
+
+	if (getLaunchers().length === 0) {
+		reinitLaunchers(["0"]);
+	}
 
 	resetNewRowTimer();
 	addRowInterval = window
@@ -398,12 +411,13 @@ function startGame() {
 			mus1.play();
 		}, 26000
 	);
+	swapBall = makeSwapBall();
+	getLaunchers().forEach(l => {
+		l.marble = null;
+		reloadLaucher(null, l);
+	});
 	startLevel(1);
 }
-getLaunchers().forEach(l => {
-	l.marble = null;
-	reloadLaucher(null, l);
-});
 
 
 textLayer.style.backgroundColor = "rgba(96,96,96,0.6)";
