@@ -661,7 +661,7 @@ return /******/ (function(modules) { // webpackBootstrap
 				ctx.fillText(txt, _x, _y);
 				var width = ctx.measureText(txt).width;
 				var doClear = function doClear() {
-					return ctx.clearRect(_x, _y - 50 * scale, width + 5, 50 * scale);
+					return ctx.clearRect(_x, _y - 55 * scale, width + 5, 55 * scale);
 				};
 				if (timeout) {
 					setTimeout(doClear, timeout || 500);
