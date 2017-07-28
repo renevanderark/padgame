@@ -375,12 +375,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	var setLevelPoints = function setLevelPoints(amt) {
-		if (levelPoints >= levelTarget) {
+		levelPoints = amt;
+		if (amt >= levelTarget) {
 			finishLevel();
 		} else {
-			pointBar.querySelector("div").style.width = parseInt(amt / levelTarget * 100) + "%";
-			pointBarVert.querySelector("div").style.height = parseInt(amt / levelTarget * 100) + "%";
-			levelPoints = amt;
+			var perc = amt / levelTarget;
+			pointBar.querySelector("div").style.width = parseInt((perc > 1 ? 1 : perc) * 100) + "%";
+			pointBarVert.querySelector("div").style.height = parseInt((perc > 1 ? 1 : perc) * 100) + "%";
 		}
 	};
 

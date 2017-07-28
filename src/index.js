@@ -305,7 +305,7 @@ const setLevelPoints = (amt) => {
 		pointBar.querySelector("div").style.width =
 			`${parseInt((perc > 1 ? 1 : perc) * 100)}%`;
 		pointBarVert.querySelector("div").style.height =
-			`${parseInt((perc > 1 ? 1 : perc)) * 100)}%`;
+			`${parseInt((perc > 1 ? 1 : perc) * 100)}%`;
 	}
 }
 
