@@ -61,7 +61,7 @@ class Launcher {
 		let x = X, y = Y, ang = ANG,
 			minX = X, minY = Y, maxX = X, maxY = Y;
 		ctx.beginPath();
-		ctx.strokeStyle = "rgba(255, 128, 128, 0.4)";
+		ctx.strokeStyle = "rgba(255, 128, 128, 0.2)";
 		ctx.lineWidth = marbleRadius * 2 * scale;
 		ctx.moveTo(x * scale, y * scale);
 
