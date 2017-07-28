@@ -7,7 +7,7 @@ import Launcher from "./phyz/launcher";
 import { removeLauncherOtherThan, getLaunchers, getLauncher } from "./phyz/launcher";
 import Marble from "./phyz/marble";
 import getColliders from "./phyz/colliders";
-import { colors } from "./phyz/colors";
+import { fills, strokes, colors } from "./phyz/colors";
 import { addMarble, clearMarbles, getMarbles, removeReadyMarbles } from "./phyz/marbles";
 import { getNeighbours } from "./phyz/neighbours";
 import { initPadEvents } from "padevents";
@@ -159,7 +159,33 @@ const makeSwapBall = (colorCount = 3) => ({
 	color: parseInt(Math.random() * colorCount) + 1,
 });
 
+
 let swapBall = makeSwapBall();
+const drawSwapBall = () => {
+	document.querySelectorAll(".swap-ball").forEach(bc => {
+		const ctx = bc.getContext('2d');
+		ctx.clearRect(0, 0, 40, 40);
+		ctx.beginPath();
+		ctx.fillStyle = fills[swapBall.color];
+		ctx.arc(
+			marbleRadius * 0.5 + 5, marbleRadius * 0.5 + 5,
+			marbleRadius * 0.5,  0, 2 * Math.PI, false
+		)
+		ctx.fill();
+		ctx.closePath();
+
+		ctx.beginPath();
+		ctx.fillStyle = strokes[swapBall.color];
+		ctx.arc(
+			marbleRadius * 0.5 + 5, marbleRadius * 0.5 + 5,
+			(marbleRadius - 4) * 0.5,  Math.PI,  Math.PI * 1.5, false
+		);
+		ctx.fill();
+		ctx.closePath();
+	})
+
+}
+drawSwapBall();
 
 const makeSwapBallFromMarble = (marble) => ({
 	...baseMarbleOpts,
@@ -181,6 +207,7 @@ const swapBalls = (controllerIndex) => {
 			angle: l.ang - (90 * (Math.PI / 180))
 		});
 		swapBall = makeSwapBallFromMarble(orig);
+		drawSwapBall();
 		l.marble = swap;
 		forceRedraw();
 	}
@@ -193,6 +220,7 @@ const reloadLaucher = (lIdx, launcher = null) => {
 			...swapBall, x: l._x, y: l._y, angle: l.ang - (90 * (Math.PI / 180))
 		});
 		swapBall = makeSwapBall(getColorCount());
+		drawSwapBall();
 	}
 }
 
@@ -398,6 +426,10 @@ function onRightClick(ev) {
 	return false;
 }
 
+function onSwapBallClick() {
+	swapBalls("0");
+}
+
 function onRightPressed({detail: { controllerIndex }}) {
 	getLauncher(controllerIndex).accDir = 1;
 }
@@ -440,7 +472,9 @@ function startGame() {
 	eventListeners.add("mousemove", onMouseMove, textLayer);
 	eventListeners.add("touchmove", onTouchMove, textLayer);
 	eventListeners.add("touchstart", onTouchMove, textLayer);
-
+	document.querySelectorAll(".swap-ball").forEach(bc => {
+		eventListeners.add("click", onSwapBallClick, bc);
+	});
 	if (getLaunchers().length === 0) {
 		reinitLaunchers(["0"]);
 	}
@@ -454,6 +488,7 @@ function startGame() {
 		}, 26000
 	);
 	swapBall = makeSwapBall();
+	drawSwapBall();
 	getLaunchers().forEach(l => {
 		l.marble = null;
 		reloadLaucher(null, l);
