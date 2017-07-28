@@ -122,10 +122,8 @@ window.setInterval(
 		getLaunchers().forEach(l => {
 			l.accelerate();
 			l.accelerate();
-			l.accelerate();
 		});
 		getMarbles().forEach(m => {
-			m.accelerate();
 			m.accelerate();
 			m.accelerate();
 			if (m.snapped && !m.readyToBeRemoved && !m.markedForRemoval &&  m._y > VIRT_WIDTH - m.radius * 2) {
@@ -133,7 +131,7 @@ window.setInterval(
 			}
 		});
 	},
-  30
+  20
 );
 
 function getColorCount() {
