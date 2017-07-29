@@ -157,12 +157,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 	var forceRedraw = function forceRedraw() {
-		[ballFrameRenderer, snapFrameRenderer, launcherFrameRenderer].forEach(function (frame) {
-			return frame.clear();
+		[ballFrameRenderer, snapFrameRenderer, launcherFrameRenderer, textFrameRenderer].forEach(function (frame) {
+			frame.clear();
+			frame.redrawText();
 		});
 		getDrawables().forEach(function (d) {
 			return d.updated = true;
 		});
+	};
+
+	window.oncontextmenu = function (ev) {
+		ev.preventDefault();
+		ev.stopPropagation();
+		return false;
 	};
 
 	(0, _viewport2.default)((0, _resizeListeners2.default)([ballLayer, snapLayer, launcherLayer, textLayer], ballFrameRenderer.onResize, snapFrameRenderer.onResize, launcherFrameRenderer.onResize, textFrameRenderer.onResize, eventListeners.onResize, forceRedraw, function (w, h) {
@@ -198,22 +205,27 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	renderLoop();
 
+	var isGameover = false;
 	window.setInterval(function () {
+		if (isGameover) {
+			return;
+		}
 		(0, _marbles.removeReadyMarbles)();
 		(0, _launcher.getLaunchers)().forEach(function (l) {
-			l.accelerate();
 			l.accelerate();
 			l.accelerate();
 		});
 		(0, _marbles.getMarbles)().forEach(function (m) {
 			m.accelerate();
 			m.accelerate();
-			m.accelerate();
 			if (m.snapped && !m.readyToBeRemoved && !m.markedForRemoval && m._y > _virtWidth2.default - m.radius * 2) {
-				gameOver();
+				isGameover = true;
 			}
 		});
-	}, 30);
+		if (isGameover) {
+			window.setTimeout(gameOver, 750);
+		}
+	}, 20);
 
 	function getColorCount() {
 		return level < 6 ? 3 : level < 16 ? 4 : 5;
@@ -373,6 +385,11 @@ return /******/ (function(modules) { // webpackBootstrap
 		pointBarVert.querySelector("div").style.height = "100%";
 		levelPoints = 0;
 		textFrameRenderer.drawText("Well done!", { x: 360, y: 500, fill: "white", timeout: 1250 });
+		(0, _marbles.getMarbles)().filter(function (m) {
+			return m.snapped && m._y > _virtWidth2.default * 0.33;
+		}).forEach(function (m, i) {
+			return m.startFalling();
+		});
 		setTimeout(function () {
 			return startLevel(level + 1);
 		}, 1250);
@@ -430,8 +447,8 @@ return /******/ (function(modules) { // webpackBootstrap
 		}
 	};
 
-	var clearWelcome = textFrameRenderer.drawText("Press start", {
-		x: 350,
+	var clearWelcome = textFrameRenderer.drawText("Touch to start, release to fire!", {
+		x: 100,
 		y: 500,
 		fill: "white"
 	});
@@ -470,15 +487,15 @@ return /******/ (function(modules) { // webpackBootstrap
 		window.removeEventListener("gamepad-left-released", onArrowReleased);
 		window.removeEventListener("gamepad-right-pressed", onRightPressed);
 		window.removeEventListener("gamepad-right-released", onArrowReleased);
-		window.removeEventListener("contextmenu", onRightClick);
 		eventListeners.clear();
-		clearWelcome = textFrameRenderer.drawText("Game over! Press start", {
+		clearWelcome = textFrameRenderer.drawText("Game over! Touch to start", {
 			x: 150,
 			y: 500,
 			fill: "white"
 		});
+
 		window.addEventListener("gamepad-start-pressed", startGame);
-		window.addEventListener("click", startGame);
+		window.addEventListener("mousedown", startGame);
 		window.addEventListener("touchstart", startGame);
 	}
 
@@ -507,12 +524,6 @@ return /******/ (function(modules) { // webpackBootstrap
 		var controllerIndex = _ref4.detail.controllerIndex;
 
 		swapBalls(controllerIndex);
-	}
-
-	function onRightClick(ev) {
-		ev.preventDefault();
-		swapBalls("0");
-		return false;
 	}
 
 	function onSwapBallClick() {
@@ -552,7 +563,7 @@ return /******/ (function(modules) { // webpackBootstrap
 		clearWelcome();
 		textLayer.style.backgroundColor = "rgba(0,0,0,0)";
 		window.removeEventListener("gamepad-start-pressed", startGame);
-		window.removeEventListener("click", startGame);
+		window.removeEventListener("mousedown", startGame);
 		window.removeEventListener("touchstart", startGame);
 		window.addEventListener("gamepad-l-axis-x-change", onAxis);
 		window.addEventListener("gamepad-a-pressed", onAPressed);
@@ -561,7 +572,6 @@ return /******/ (function(modules) { // webpackBootstrap
 		window.addEventListener("gamepad-left-released", onArrowReleased);
 		window.addEventListener("gamepad-right-pressed", onRightPressed);
 		window.addEventListener("gamepad-right-released", onArrowReleased);
-		window.addEventListener("contextmenu", onRightClick);
 		eventListeners.add("click", onClick, textLayer);
 		eventListeners.add("touchend", onClick, textLayer);
 		eventListeners.add("mousemove", onMouseMove, textLayer);
@@ -586,13 +596,14 @@ return /******/ (function(modules) { // webpackBootstrap
 			l.marble = null;
 			reloadLaucher(null, l);
 		});
+		isGameover = false;
 		startLevel(1);
 	}
 
 	textLayer.style.backgroundColor = "rgba(96,96,96,0.6)";
 
 	window.addEventListener("gamepad-start-pressed", startGame);
-	window.addEventListener("click", startGame);
+	window.addEventListener("mousedown", startGame);
 	window.addEventListener("touchstart", startGame);
 	(0, _padevents.initPadEvents)({ onControllersChange: reinitLaunchers });
 
@@ -611,6 +622,47 @@ return /******/ (function(modules) { // webpackBootstrap
 		    height = void 0,
 		    scale = void 0;
 		var clearRequested = false;
+		var activeMessage = null;
+		var drawText = function drawText(txt, _ref) {
+			var _ref$x = _ref.x,
+			    x = _ref$x === undefined ? 50 : _ref$x,
+			    _ref$y = _ref.y,
+			    y = _ref$y === undefined ? 50 : _ref$y,
+			    _ref$timeout = _ref.timeout,
+			    timeout = _ref$timeout === undefined ? null : _ref$timeout,
+			    _ref$fill = _ref.fill,
+			    fill = _ref$fill === undefined ? null : _ref$fill,
+			    _ref$font = _ref.font,
+			    font = _ref$font === undefined ? null : _ref$font,
+			    _ref$shade = _ref.shade,
+			    shade = _ref$shade === undefined ? false : _ref$shade,
+			    _ref$shadeDistance = _ref.shadeDistance,
+			    shadeDistance = _ref$shadeDistance === undefined ? null : _ref$shadeDistance;
+
+			if (timeout === null) {
+				activeMessage = {
+					txt: txt, x: x, y: y, fill: fill, font: font, shade: shade, shadeDistance: shadeDistance
+				};
+			}
+			var _x = parseInt(Math.ceil(x * scale), 10);
+			var _y = parseInt(Math.ceil(y * scale), 10);
+			ctx.font = font || "bold " + 50 * scale + "px sans-serif";
+			if (shade) {
+				ctx.fillStyle = shade;
+				ctx.fillText(txt, _x + (shadeDistance || 2), _y + (shadeDistance || 2));
+			}
+			ctx.fillStyle = fill || "#a00";
+			ctx.fillText(txt, _x, _y);
+			var width = ctx.measureText(txt).width;
+			var doClear = function doClear() {
+				ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+				activeMessage = null;
+			};
+			if (timeout) {
+				setTimeout(doClear, timeout || 500);
+			}
+			return doClear;
+		};
 
 		return {
 			onResize: function onResize(w, h) {
@@ -638,39 +690,11 @@ return /******/ (function(modules) { // webpackBootstrap
 					return d.draw(ctx, scale);
 				});
 			},
-			drawText: function drawText(txt, _ref) {
-				var _ref$x = _ref.x,
-				    x = _ref$x === undefined ? 50 : _ref$x,
-				    _ref$y = _ref.y,
-				    y = _ref$y === undefined ? 50 : _ref$y,
-				    _ref$timeout = _ref.timeout,
-				    timeout = _ref$timeout === undefined ? null : _ref$timeout,
-				    _ref$fill = _ref.fill,
-				    fill = _ref$fill === undefined ? null : _ref$fill,
-				    _ref$font = _ref.font,
-				    font = _ref$font === undefined ? null : _ref$font,
-				    _ref$shade = _ref.shade,
-				    shade = _ref$shade === undefined ? false : _ref$shade,
-				    _ref$shadeDistance = _ref.shadeDistance,
-				    shadeDistance = _ref$shadeDistance === undefined ? null : _ref$shadeDistance;
-
-				var _x = parseInt(Math.ceil(x * scale), 10);
-				var _y = parseInt(Math.ceil(y * scale), 10);
-				ctx.font = font || "bold " + 50 * scale + "px sans-serif";
-				if (shade) {
-					ctx.fillStyle = shade;
-					ctx.fillText(txt, _x + (shadeDistance || 2), _y + (shadeDistance || 2));
+			drawText: drawText,
+			redrawText: function redrawText() {
+				if (activeMessage) {
+					drawText(activeMessage.txt, activeMessage);
 				}
-				ctx.fillStyle = fill || "#a00";
-				ctx.fillText(txt, _x, _y);
-				var width = ctx.measureText(txt).width;
-				var doClear = function doClear() {
-					return ctx.clearRect(_x, _y - 55 * scale, width + 5, 56 * scale);
-				};
-				if (timeout) {
-					setTimeout(doClear, timeout || 500);
-				}
-				return doClear;
 			}
 		};
 	};
