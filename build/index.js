@@ -82,17 +82,21 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _marble2 = _interopRequireDefault(_marble);
 
-	var _colliders = __webpack_require__(15);
+	var _colliders = __webpack_require__(16);
 
 	var _colliders2 = _interopRequireDefault(_colliders);
 
 	var _colors = __webpack_require__(13);
 
-	var _marbles = __webpack_require__(16);
+	var _marbles = __webpack_require__(17);
 
 	var _neighbours = __webpack_require__(14);
 
-	var _padevents = __webpack_require__(17);
+	var _padevents = __webpack_require__(18);
+
+	var _wrappedAudio = __webpack_require__(15);
+
+	var _wrappedAudio2 = _interopRequireDefault(_wrappedAudio);
 
 	var _virtWidth = __webpack_require__(6);
 
@@ -121,10 +125,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var colliders = (0, _colliders2.default)(_marbles.getMarbles);
 	var getNeighboursImpl = (0, _neighbours.getNeighbours)(_marbles.getMarbles, addLevelPoints);
-	var mus1 = new Audio("./mus1.ogg");
-	var crack = new Audio("./crack.ogg");
-	var crack2 = new Audio("./crack2.ogg");
-	var plock = new Audio("./plock.ogg");
+	var mus1 = new _wrappedAudio2.default("mus1");
 
 	window.addEventListener("load", function () {
 		return setTimeout(function () {
@@ -1017,6 +1018,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _neighbours = __webpack_require__(14);
 
+	var _wrappedAudio = __webpack_require__(15);
+
+	var _wrappedAudio2 = _interopRequireDefault(_wrappedAudio);
+
 	var _virtWidth = __webpack_require__(6);
 
 	var _virtWidth2 = _interopRequireDefault(_virtWidth);
@@ -1025,10 +1030,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-	var crack = new Audio("./crack.ogg");
-	var crack2 = new Audio("./crack2.ogg");
+	var crack = new _wrappedAudio2.default("crack");
+	var crack2 = new _wrappedAudio2.default("crack2");
 	var cracks = [crack, crack2];
-	var plock = new Audio("./plock.ogg");
+	var plock = new _wrappedAudio2.default("plock");
 
 	var Marble = function () {
 		function Marble(_ref) {
@@ -1616,6 +1621,48 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 15 */
 /***/ function(module, exports) {
 
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	var WrappedAudio = function () {
+	  function WrappedAudio(resourceName) {
+	    _classCallCheck(this, WrappedAudio);
+
+	    if (typeof android !== 'undefined' && android.playAudio) {
+	      this.audio = {
+	        play: function play() {
+	          return android.playAudio(resourceName);
+	        }
+	      };
+	    } else {
+	      this.audio = new Audio('./' + resourceName + '.ogg');
+	    }
+	  }
+
+	  _createClass(WrappedAudio, [{
+	    key: 'play',
+	    value: function play() {
+
+	      this.audio.play();
+	    }
+	  }]);
+
+	  return WrappedAudio;
+	}();
+
+	exports.default = WrappedAudio;
+
+/***/ },
+/* 16 */
+/***/ function(module, exports) {
+
 	"use strict";
 
 	Object.defineProperty(exports, "__esModule", {
@@ -1646,7 +1693,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 16 */
+/* 17 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -1683,7 +1730,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.removeReadyMarbles = removeReadyMarbles;
 
 /***/ },
-/* 17 */
+/* 18 */
 /***/ function(module, exports) {
 
 	/*
