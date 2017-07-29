@@ -295,6 +295,9 @@ function finishLevel() {
 	levelPoints = 0;
 	textFrameRenderer
 		.drawText("Well done!", {x: 360, y: 500, fill: "white", timeout: 1250});
+	getMarbles()
+		.filter(m => m.snapped && m._y > VIRT_WIDTH * 0.33)
+		.forEach((m, i) => m.startFalling());
 	setTimeout(() => startLevel(level + 1), 1250);
 }
 
@@ -345,11 +348,12 @@ const startLevel = (lvl) => {
 	textFrameRenderer
 		.drawText(`Level ${lvl}!`, {x: 360, y: 500, fill: "white", timeout: 1250});
 
+
+
 	if (level === 1) {
 		addRows(5);
 		mus1.play();
 	}
-
 };
 
 let clearWelcome = textFrameRenderer.drawText("Press start", {
@@ -392,7 +396,6 @@ function gameOver() {
 	window.removeEventListener("gamepad-left-released", onArrowReleased);
 	window.removeEventListener("gamepad-right-pressed", onRightPressed);
 	window.removeEventListener("gamepad-right-released", onArrowReleased);
-	window.removeEventListener("contextmenu", onRightClick);
 	eventListeners.clear();
 	clearWelcome = textFrameRenderer.drawText("Game over! Press start", {
 		x: 150,
@@ -421,12 +424,6 @@ function onAPressed({detail: { controllerIndex }}) {
 
 function onBPressed({detail: { controllerIndex }}) {
 	swapBalls(controllerIndex);
-}
-
-function onRightClick(ev) {
-	ev.preventDefault();
-	swapBalls("0");
-	return false;
 }
 
 function onSwapBallClick() {
@@ -469,7 +466,6 @@ function startGame() {
 	window.addEventListener("gamepad-left-released", onArrowReleased);
 	window.addEventListener("gamepad-right-pressed", onRightPressed);
 	window.addEventListener("gamepad-right-released", onArrowReleased);
-	window.addEventListener("contextmenu", onRightClick);
 	eventListeners.add("click", onClick, textLayer);
 	eventListeners.add("touchend", onClick, textLayer);
 	eventListeners.add("mousemove", onMouseMove, textLayer);
