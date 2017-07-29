@@ -1,12 +1,13 @@
 import uuid from "uuid";
 import { fills, strokes, colors } from "./colors";
 import { getNeighbourCoordinates } from "./neighbours";
+import WrappedAudio from "./wrapped-audio";
 import VIRT_WIDTH from "./virt-width";
 
-const crack = new Audio("./crack.ogg");
-const crack2 = new Audio("./crack2.ogg");
+const crack = new WrappedAudio("crack");
+const crack2 = new WrappedAudio("crack2");
 const cracks = [crack, crack2];
-const plock = new Audio("./plock.ogg");
+const plock = new WrappedAudio("plock");
 
 class Marble {
 

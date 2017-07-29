@@ -11,7 +11,7 @@ import { fills, strokes, colors } from "./phyz/colors";
 import { addMarble, clearMarbles, getMarbles, removeReadyMarbles } from "./phyz/marbles";
 import { getNeighbours } from "./phyz/neighbours";
 import { initPadEvents } from "padevents";
-
+import WrappedAudio from "./phyz/wrapped-audio";
 import VIRT_WIDTH from "./phyz/virt-width";
 
 const eventListeners = getEventListeners(VIRT_WIDTH);
@@ -35,10 +35,7 @@ const textFrameRenderer = getFrameRenderer(textLayerCtx, VIRT_WIDTH);
 
 const colliders = getColliders(getMarbles);
 const getNeighboursImpl = getNeighbours(getMarbles, addLevelPoints);
-const mus1 = new Audio("./mus1.ogg");
-const crack = new Audio("./crack.ogg");
-const crack2 = new Audio("./crack2.ogg");
-const plock = new Audio("./plock.ogg");
+const mus1 = new WrappedAudio("mus1");
 
 window.addEventListener("load", () => setTimeout(() => window.scrollTo(0, 1), 0));
 
