@@ -64,10 +64,19 @@ const getDrawables = () =>
 		.concat(getLauncherLayerDrawables());
 
 const forceRedraw = () => {
-	[ballFrameRenderer, snapFrameRenderer, launcherFrameRenderer]
-		.forEach(frame => frame.clear());
+	[ballFrameRenderer, snapFrameRenderer, launcherFrameRenderer, textFrameRenderer]
+		.forEach(frame => {
+			frame.clear()
+			frame.redrawText();
+		});
 	getDrawables().forEach(d => d.updated = true);
 };
+
+window.oncontextmenu = function(ev) {
+	ev.preventDefault();
+	ev.stopPropagation();
+	return false;
+}
 
 initViewPort(getResizeListeners([ballLayer, snapLayer, launcherLayer, textLayer],
 	ballFrameRenderer.onResize,
@@ -116,8 +125,10 @@ const renderLoop = () => {
 
 renderLoop();
 
+let isGameover = false;
 window.setInterval(
   () => {
+		if (isGameover) { return; }
 		removeReadyMarbles();
 		getLaunchers().forEach(l => {
 			l.accelerate();
@@ -127,9 +138,13 @@ window.setInterval(
 			m.accelerate();
 			m.accelerate();
 			if (m.snapped && !m.readyToBeRemoved && !m.markedForRemoval &&  m._y > VIRT_WIDTH - m.radius * 2) {
-				gameOver();
+				isGameover = true;
 			}
 		});
+		if (isGameover) {
+			window.setTimeout(gameOver, 750);
+		}
+
 	},
   20
 );
@@ -356,8 +371,8 @@ const startLevel = (lvl) => {
 	}
 };
 
-let clearWelcome = textFrameRenderer.drawText("Press start", {
-	x: 350,
+let clearWelcome = textFrameRenderer.drawText("Touch to start, release to fire!", {
+	x: 100,
 	y: 500,
 	fill: "white"
 });
@@ -397,13 +412,14 @@ function gameOver() {
 	window.removeEventListener("gamepad-right-pressed", onRightPressed);
 	window.removeEventListener("gamepad-right-released", onArrowReleased);
 	eventListeners.clear();
-	clearWelcome = textFrameRenderer.drawText("Game over! Press start", {
+	clearWelcome = textFrameRenderer.drawText("Game over! Touch to start", {
 		x: 150,
 		y: 500,
 		fill: "white"
 	});
+
 	window.addEventListener("gamepad-start-pressed", startGame);
-	window.addEventListener("click", startGame);
+	window.addEventListener("mousedown", startGame);
 	window.addEventListener("touchstart", startGame);
 }
 
@@ -457,7 +473,7 @@ function startGame() {
 	clearWelcome();
 	textLayer.style.backgroundColor = "rgba(0,0,0,0)";
 	window.removeEventListener("gamepad-start-pressed", startGame);
-	window.removeEventListener("click", startGame);
+	window.removeEventListener("mousedown", startGame);
 	window.removeEventListener("touchstart", startGame);
 	window.addEventListener("gamepad-l-axis-x-change", onAxis);
 	window.addEventListener("gamepad-a-pressed", onAPressed);
@@ -492,6 +508,7 @@ function startGame() {
 		l.marble = null;
 		reloadLaucher(null, l);
 	});
+	isGameover = false;
 	startLevel(1);
 }
 
@@ -499,6 +516,6 @@ function startGame() {
 textLayer.style.backgroundColor = "rgba(96,96,96,0.6)";
 
 window.addEventListener("gamepad-start-pressed", startGame);
-window.addEventListener("click", startGame);
+window.addEventListener("mousedown", startGame);
 window.addEventListener("touchstart", startGame);
 initPadEvents({ onControllersChange: reinitLaunchers});
