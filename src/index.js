@@ -37,6 +37,8 @@ const colliders = getColliders(getMarbles);
 const getNeighboursImpl = getNeighbours(getMarbles, addLevelPoints);
 const mus1 = new WrappedAudio("mus1");
 
+const airConsole = new AirConsole();
+
 window.addEventListener("load", () => setTimeout(() => window.scrollTo(0, 1), 0));
 
 
@@ -418,6 +420,8 @@ function gameOver() {
 	window.addEventListener("gamepad-start-pressed", startGame);
 	window.addEventListener("mousedown", startGame);
 	window.addEventListener("touchstart", startGame);
+	airConsole.onMessage = (device, data) => startGame();
+
 }
 
 function onAxis({detail: {force, controllerIndex}}) {
@@ -480,6 +484,9 @@ function startGame() {
 	window.addEventListener("gamepad-right-pressed", onRightPressed);
 	window.addEventListener("gamepad-right-released", onArrowReleased);
 	eventListeners.add("click", onClick, textLayer);
+	airConsole.onMessage = (device, data) => onClick();
+
+
 	eventListeners.add("touchend", onClick, textLayer);
 	eventListeners.add("mousemove", onMouseMove, textLayer);
 	eventListeners.add("touchmove", onTouchMove, textLayer);
@@ -516,3 +523,7 @@ window.addEventListener("gamepad-start-pressed", startGame);
 window.addEventListener("mousedown", startGame);
 window.addEventListener("touchstart", startGame);
 initPadEvents({ onControllersChange: reinitLaunchers});
+airConsole.onMessage = function(device, data) {
+	console.log("HELLO?" + device + " -- " + data);
+	startGame();
+}

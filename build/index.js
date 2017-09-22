@@ -127,6 +127,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	var getNeighboursImpl = (0, _neighbours.getNeighbours)(_marbles.getMarbles, addLevelPoints);
 	var mus1 = new _wrappedAudio2.default("mus1");
 
+	var airConsole = new AirConsole();
+
 	window.addEventListener("load", function () {
 		return setTimeout(function () {
 			return window.scrollTo(0, 1);
@@ -498,6 +500,9 @@ return /******/ (function(modules) { // webpackBootstrap
 		window.addEventListener("gamepad-start-pressed", startGame);
 		window.addEventListener("mousedown", startGame);
 		window.addEventListener("touchstart", startGame);
+		airConsole.onMessage = function (device, data) {
+			return startGame();
+		};
 	}
 
 	function onAxis(_ref2) {
@@ -574,6 +579,10 @@ return /******/ (function(modules) { // webpackBootstrap
 		window.addEventListener("gamepad-right-pressed", onRightPressed);
 		window.addEventListener("gamepad-right-released", onArrowReleased);
 		eventListeners.add("click", onClick, textLayer);
+		airConsole.onMessage = function (device, data) {
+			return onClick();
+		};
+
 		eventListeners.add("touchend", onClick, textLayer);
 		eventListeners.add("mousemove", onMouseMove, textLayer);
 		eventListeners.add("touchmove", onTouchMove, textLayer);
@@ -607,6 +616,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	window.addEventListener("mousedown", startGame);
 	window.addEventListener("touchstart", startGame);
 	(0, _padevents.initPadEvents)({ onControllersChange: reinitLaunchers });
+	airConsole.onMessage = function (device, data) {
+		console.log("HELLO?" + device + " -- " + data);
+		startGame();
+	};
 
 /***/ },
 /* 1 */
