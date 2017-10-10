@@ -7,7 +7,7 @@ const maxAng = 1.5;
 let launchers = {};
 
 const getLaunchers = () =>
-	Object.keys(launchers).map(k => launchers[k]);
+	Object.keys(launchers).map(k => launchers[k]).filter(l => !!l);
 
 const marbleRadius = 30;
 class Launcher {

@@ -10,7 +10,6 @@ import getColliders from "./phyz/colliders";
 import { fills, strokes, colors } from "./phyz/colors";
 import { addMarble, clearMarbles, getMarbles, removeReadyMarbles } from "./phyz/marbles";
 import { getNeighbours } from "./phyz/neighbours";
-import { initPadEvents } from "padevents";
 import WrappedAudio from "./phyz/wrapped-audio";
 import VIRT_WIDTH from "./phyz/virt-width";
 
@@ -403,6 +402,7 @@ function gameOver() {
 		window.clearInterval(addRowInterval);
 	}
 
+/*
 	window.removeEventListener("gamepad-l-axis-x-change", onAxis);
 	window.removeEventListener("gamepad-a-pressed", onAPressed);
 	window.removeEventListener("gamepad-b-pressed", onBPressed);
@@ -410,16 +410,19 @@ function gameOver() {
 	window.removeEventListener("gamepad-left-released", onArrowReleased);
 	window.removeEventListener("gamepad-right-pressed", onRightPressed);
 	window.removeEventListener("gamepad-right-released", onArrowReleased);
+*/
+
 	eventListeners.clear();
 	clearWelcome = textFrameRenderer.drawText("Game over! Touch to start", {
 		x: 150,
 		y: 500,
 		fill: "white"
 	});
-
+/*
 	window.addEventListener("gamepad-start-pressed", startGame);
 	window.addEventListener("mousedown", startGame);
 	window.addEventListener("touchstart", startGame);
+*/
 	airConsole.onMessage = (device, data) => startGame();
 
 }
@@ -473,6 +476,7 @@ function startGame() {
 	forceRedraw();
 	clearWelcome();
 	textLayer.style.backgroundColor = "rgba(0,0,0,0)";
+/*
 	window.removeEventListener("gamepad-start-pressed", startGame);
 	window.removeEventListener("mousedown", startGame);
 	window.removeEventListener("touchstart", startGame);
@@ -484,9 +488,13 @@ function startGame() {
 	window.addEventListener("gamepad-right-pressed", onRightPressed);
 	window.addEventListener("gamepad-right-released", onArrowReleased);
 	eventListeners.add("click", onClick, textLayer);
-	airConsole.onMessage = (device, data) => onClick();
+*/
+	airConsole.onMessage = (device, data) => {
+		console.log(device);
+		onAPressed({detail: {controllerIndex: device}});
+	};
 
-
+/*
 	eventListeners.add("touchend", onClick, textLayer);
 	eventListeners.add("mousemove", onMouseMove, textLayer);
 	eventListeners.add("touchmove", onTouchMove, textLayer);
@@ -494,6 +502,7 @@ function startGame() {
 	document.querySelectorAll(".swap-ball").forEach(bc => {
 		eventListeners.add("click", onSwapBallClick, bc);
 	});
+	*/
 	if (getLaunchers().length === 0) {
 		reinitLaunchers(["0"]);
 	}
@@ -522,8 +531,5 @@ textLayer.style.backgroundColor = "rgba(96,96,96,0.6)";
 window.addEventListener("gamepad-start-pressed", startGame);
 window.addEventListener("mousedown", startGame);
 window.addEventListener("touchstart", startGame);
-initPadEvents({ onControllersChange: reinitLaunchers});
-airConsole.onMessage = function(device, data) {
-	console.log("HELLO?" + device + " -- " + data);
-	startGame();
-}
+
+airConsole.onMessage = startGame;
